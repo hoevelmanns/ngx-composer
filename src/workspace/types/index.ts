@@ -1,4 +1,4 @@
-import { IWorkspaceConfig } from "./workspace-config";
+import { IWorkspaceConfig } from "./workspace-config"
 
 export {
     IWorkspaceConfig,
