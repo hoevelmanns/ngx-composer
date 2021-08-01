@@ -6,6 +6,7 @@ import {IProjectConfig} from './types/workspace-config'
 class Project {
     public name: string
     public modulePath: string
+
     // todo folder hash
 
     constructor(private projectConfig: IProjectConfig, public projectName: string, private workspaceDir: string) {
@@ -22,8 +23,6 @@ export default class Workspace {
     }
 
     init = (): Workspace => {
-        if (this.config) return this
-
         this.config = readJSONSync(this.location.path)
         this.config.dir = this.location.dir
 

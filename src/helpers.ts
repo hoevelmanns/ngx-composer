@@ -2,7 +2,7 @@ import {rmdirSync} from "fs"
 import {mkdirpSync} from "fs-extra"
 
 class Helpers {
-    static removeProps = (obj: string[], ...keys) => keys.map(key => delete obj[key]) && obj
+    static removeProps = (obj: string[], ...keys) => keys.map(key => delete obj[<string>key]) && obj
 
     static getArgOptions = (argv: any): any =>
         Object.entries(argv)

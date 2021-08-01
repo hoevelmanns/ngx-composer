@@ -9,7 +9,7 @@ export class Tree {
     private report = new Report()
 
     init(source = '**'): void {
-        const workspaces: string[] = fg.sync(path.join(source, 'angular.json'));
+        const workspaces: string[] = fg.sync(path.join(source, 'angular.json'))
 
         if (!workspaces.length) {
             console.log(chalk.cyan('No angular workspaces found. Nothing to do.'))
