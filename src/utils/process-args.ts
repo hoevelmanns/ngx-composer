@@ -8,4 +8,3 @@ export const getArgOptions = (argv: any): any =>
 
 export const argOptionsToString = (argv: { [key: string]: string }) =>
     Object.entries(argv).map(([key, val]) => `--${key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLocaleLowerCase()} ${val}`).join(' ').trim()
-

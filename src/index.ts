@@ -1,12 +1,18 @@
 import chalk from 'chalk'
-import {Build} from './targets'
+import {Target} from "./targets/types"
+import {build} from "./targets/build"
 
-const argv = require('yargs')
-  .command('build', 'Builds the applications', {source: {description: 'directory or glob pattern to define the apps to process'}})
-  .help()
-  .alias('help', 'h')
-  .argv
+export type Targets = Target[]
+
+const yargs = require('yargs')
+
+const targets: Targets = [
+    build(yargs)
+    // todo merge plugins from config
+]
 
 console.log(chalk.bold.hex('9F2B68').inverse(' NGX COMPOSER '), '\n')
 
-argv._.includes('build') && new Build(argv).run()
+yargs.help().argv
+
+targets.map(t => t.init())

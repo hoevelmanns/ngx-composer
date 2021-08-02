@@ -7,9 +7,11 @@ class Project {
     public name: string
     public modulePath: string
 
-    // todo folder hash
-
-    constructor(private projectConfig: IProjectConfig, public projectName: string, private workspaceDir: string) {
+    constructor(
+        private projectConfig: IProjectConfig,
+        public projectName: string,
+        private workspaceDir: string
+    ) {
         this.name = projectName
         this.modulePath = path.join(process.cwd(), workspaceDir, this.projectConfig.sourceRoot, 'app', 'app.module')
     }

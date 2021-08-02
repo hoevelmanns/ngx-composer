@@ -10,11 +10,16 @@ import path from "path"
 export class Build implements Target {
     private shell: Shell = new Shell() // todo di injection
 
-    constructor(private argv: any) {
+    constructor(private yargs: any) {
+    }
+
+    init(): any { // todo write decorator?
+        this.yargs.command('build', 'Builds the applications', {source: {description: 'directory or glob pattern to define the apps to process'}})
+        this.yargs.argv._.includes('build') && this.run()
     }
 
     async run(): Promise<void> {
-        const tree = new Tree().init(this.argv.source)
+        const tree = new Tree().init(this.yargs.argv.source)
 
         try {
             await new Listr([{
@@ -32,7 +37,7 @@ export class Build implements Target {
     }
 
     protected execute = (): void => {
-        const options = getArgOptions(removeProps(this.argv, 'source'))
+        const options = getArgOptions(removeProps(this.yargs.argv, 'source'))
 
         options?.outputPath && (options.outputPath = path.join(process.cwd(), options.outputPath))
 
@@ -42,3 +47,5 @@ export class Build implements Target {
         })
     }
 }
+
+export const build = (yargs: any) => new Build(yargs)

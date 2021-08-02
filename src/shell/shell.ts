@@ -22,7 +22,7 @@ export class Shell {
         })
     }
 
-    generate = (tree: Tree): Shell => {
+    generate(tree: Tree): Shell {
         this.tree = tree
 
         cleanDir(this.tempPath)
