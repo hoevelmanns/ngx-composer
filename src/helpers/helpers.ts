@@ -1,5 +1,5 @@
-import {rmdirSync} from "fs"
-import {mkdirpSync} from "fs-extra"
+import {rmdirSync} from 'fs'
+import {mkdirpSync} from 'fs-extra'
 
 class Helpers {
     static removeProps = (obj: string[], ...keys) => keys.map(key => delete obj[<string>key]) && obj

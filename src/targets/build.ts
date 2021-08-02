@@ -2,10 +2,10 @@ import {execSync} from 'child_process'
 import path from 'path'
 import {Listr} from 'listr2'
 import chalk from 'chalk'
-import {ITarget} from "./types"
+import {ITarget} from './types'
 import { Shell } from '../shell'
-import {helpers} from "../helpers/helpers"
-import {Tree} from "../tree"
+import {helpers} from '../helpers/helpers'
+import {Tree} from '../tree'
 
 export default class Build implements ITarget {
     private shell: Shell = new Shell() // todo di injection

@@ -1,9 +1,9 @@
-import {execSync} from "child_process"
-import path from "path"
-import {Md5} from "ts-md5"
-import {writeFileSync} from "fs"
-import {Tree} from "../tree"
-import {helpers} from "../helpers/helpers"
+import {execSync} from 'child_process'
+import path from 'path'
+import {Md5} from 'ts-md5'
+import {writeFileSync} from 'fs'
+import {Tree} from '../tree'
+import {helpers} from '../helpers/helpers'
 
 export class Shell {
     protected tempPath = path.join(__dirname, '..', '.cache')

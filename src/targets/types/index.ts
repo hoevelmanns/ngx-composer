@@ -1,4 +1,4 @@
-import { ITarget } from "./target";
+import { ITarget } from './target'
 
 export {
     ITarget
