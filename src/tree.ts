@@ -8,7 +8,7 @@ export class Tree {
     public workspaces = <Workspace[]>[]
     private report = new Report()
 
-    init(source = '**'): void {
+    init(source = '**'): Tree {
         const workspaces: string[] = fg.sync(path.join(source, 'angular.json'))
 
         if (!workspaces.length) {
@@ -26,5 +26,7 @@ export class Tree {
             }).init()))
 
         this.report.listWorkspaces(this.workspaces)
+
+        return this
     }
 }

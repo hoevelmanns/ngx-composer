@@ -1,5 +1,5 @@
-import build from './build'
 import chalk from 'chalk'
+import Build from "./targets/build"
 
 const argv = require('yargs')
   .command('build', 'Builds the applications', {source: {description: 'directory or glob pattern to define the apps to process'}})
@@ -9,4 +9,4 @@ const argv = require('yargs')
 
 console.log(chalk.bold.hex('9F2B68').inverse(' NGX COMPOSER '), '\n')
 
-argv._.includes('build') && build.run(argv)
+argv._.includes('build') && new Build(argv).run()
