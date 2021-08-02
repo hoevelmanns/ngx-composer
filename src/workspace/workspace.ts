@@ -1,7 +1,7 @@
 import {IWorkspaceConfig} from './types'
 import {readJSONSync} from 'fs-extra'
-import path from 'path'
 import {IProjectConfig} from './types/workspace-config'
+import path from "path"
 
 class Project {
     public name: string

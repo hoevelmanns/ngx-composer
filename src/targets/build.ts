@@ -1,13 +1,13 @@
 import {execSync} from 'child_process'
-import path from 'path'
 import {Listr} from 'listr2'
 import chalk from 'chalk'
-import {ITarget} from './types'
-import { Shell } from '../shell'
-import {helpers} from '../helpers/helpers'
+import {Target} from './types'
+import {Shell} from '../shell'
 import {Tree} from '../tree'
+import {argOptionsToString, getArgOptions, removeProps} from "../utils"
+import path from "path"
 
-export default class Build implements ITarget {
+export class Build implements Target {
     private shell: Shell = new Shell() // todo di injection
 
     constructor(private argv: any) {
@@ -31,8 +31,7 @@ export default class Build implements ITarget {
         }
     }
 
-    execute = (): void => {
-        const {getArgOptions, removeProps, argOptionsToString} = helpers
+    protected execute = (): void => {
         const options = getArgOptions(removeProps(this.argv, 'source'))
 
         options?.outputPath && (options.outputPath = path.join(process.cwd(), options.outputPath))

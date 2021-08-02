@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import Build from "./targets/build"
+import {Build} from './targets'
 
 const argv = require('yargs')
   .command('build', 'Builds the applications', {source: {description: 'directory or glob pattern to define the apps to process'}})

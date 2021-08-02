@@ -1,4 +1,3 @@
-export interface ITarget {
-    run(): Promise<void>
-    execute(): void
+export interface Target {
+    run<T>(): Promise<T | void>
 }

@@ -3,7 +3,7 @@ import path from 'path'
 import {Md5} from 'ts-md5'
 import {writeFileSync} from 'fs'
 import {Tree} from '../tree'
-import {helpers} from '../helpers/helpers'
+import {cleanDir, createDir} from "../utils"
 
 export class Shell {
     protected tempPath = path.join(__dirname, '..', '.cache')
@@ -25,8 +25,8 @@ export class Shell {
     generate = (tree: Tree): Shell => {
         this.tree = tree
 
-        helpers.cleanDir(this.tempPath)
-        helpers.createDir(this.tempPath)
+        cleanDir(this.tempPath)
+        createDir(this.tempPath)
 
         this.overwriteMainEntryPoint()
 

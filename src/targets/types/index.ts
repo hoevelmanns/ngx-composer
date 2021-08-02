@@ -1,5 +1,5 @@
-import { ITarget } from './target'
+import { Target } from './target'
 
 export {
-    ITarget
+    Target
 }
