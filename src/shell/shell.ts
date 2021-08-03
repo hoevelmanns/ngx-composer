@@ -13,7 +13,6 @@ export class Shell {
     protected mainTsTemplate = 'main.ts.eta'
     public appPath = path.join(this.tempPath, this.appName)
     private eta = require('eta')
-    private tree: Tree
 
     constructor() {
         this.eta.configure({
@@ -23,12 +22,10 @@ export class Shell {
     }
 
     generate(tree: Tree): Shell {
-        this.tree = tree
-
         cleanDir(this.tempPath)
         createDir(this.tempPath)
 
-        this.overwriteMainEntryPoint()
+        this.overwriteMainEntryPoint(tree)
 
         execSync(`ng new ${this.appName} --defaults --minimal --skip-git --skip-tests`, {
             stdio: 'ignore',
@@ -38,13 +35,14 @@ export class Shell {
         return this
     }
 
-    private overwriteMainEntryPoint(): void {
+    private overwriteMainEntryPoint(tree: Tree): void {
         const appImports = <string[]>[]
         const bootstrapModules = <string[]>[]
 
-        this.tree.workspaces.map(app => {
+        tree.workspaces.map(app => {
             const {modulePath, name} = app.defaultProject
-            const moduleName = this.tree.workspaces.filter(w => w.defaultProject.name === name).length > 1
+            const isModuleNameRedundant = tree.workspaces.filter(w => w.defaultProject.name === name).length > 1
+            const moduleName = isModuleNameRedundant
                 ? `${name}_${Md5.hashStr(modulePath)}`
                 : name
 

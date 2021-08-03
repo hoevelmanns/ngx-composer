@@ -1,5 +1,3 @@
-import {Build} from './build'
+export * from './build'
 
-export {
-    Build
-}
+

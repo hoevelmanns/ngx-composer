@@ -1,5 +1,6 @@
-import { Target } from './target'
+import {Argv, Target } from './target'
 
 export {
-    Target
+    Target,
+    Argv,
 }

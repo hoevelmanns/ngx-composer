@@ -3,8 +3,8 @@ import {getBorderCharacters, table} from 'table'
 import Workspace from './workspace/workspace'
 
 export class Report {
-    listWorkspaces(workspaces: Workspace[]): void {
 
+    listWorkspaces(workspaces: Workspace[]): void {
         console.log(chalk.bold.whiteBright(`Found ${workspaces.length} angular ` + (workspaces.length > 1 ? 'workspaces' : 'workspace') + ':'), '\n')
 
         const info = [
@@ -22,6 +22,4 @@ export class Report {
             columnDefault: {paddingLeft: 0, paddingRight: 2},
             drawHorizontalLine: () => drawHorizontalLines
         })))
-
-    // todo final report -> with gzip size https://www.npmjs.com/package/gzip-size
 }

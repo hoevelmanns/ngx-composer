@@ -1,8 +1,10 @@
 {
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "target": "es2015",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
-  }
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "target": "es2017",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true
+    }
 }

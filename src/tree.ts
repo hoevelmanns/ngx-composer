@@ -16,8 +16,6 @@ export class Tree {
             process.exit(0)
         }
 
-        // todo check if plugin is active
-
         workspaces
             .map(c => c.replace('/angular.json', ''))
             .map(appDir => this.workspaces.push(new Workspace({

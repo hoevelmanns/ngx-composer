@@ -1,4 +1,5 @@
 export interface Target {
-    run?<T>(): Promise<T | void>
-    init(): any // todo
+    run?<T>(argv: Argv): Promise<T | void>
 }
+
+export type Argv = {[key: string]: string}

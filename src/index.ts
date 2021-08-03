@@ -1,18 +1,15 @@
+#!/usr/bin/env node
 import chalk from 'chalk'
-import {Target} from "./targets/types"
-import {build} from "./targets/build"
+import {bin, name} from '../package.json'
 
-export type Targets = Target[]
+const cliName = ` ${name.replace('-', ' ').toUpperCase()} `
+const cliBinName = Object.keys(bin).shift()
 
-const yargs = require('yargs')
+console.log(chalk.bold.hex('9F2B68').inverse(cliName), '\n')
 
-const targets: Targets = [
-    build(yargs)
-    // todo merge plugins from config
-]
-
-console.log(chalk.bold.hex('9F2B68').inverse(' NGX COMPOSER '), '\n')
-
-yargs.help().argv
-
-targets.map(t => t.init())
+require('yargs')
+    .commands(require('./targets'))
+    .scriptName(cliBinName)
+    .usage('$0 <cmd> [args]')
+    .help()
+    .argv
