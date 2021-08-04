@@ -1,9 +1,9 @@
-import {execSync} from 'child_process'
 import path from 'path'
 import {Md5} from 'ts-md5'
-import {writeFileSync} from 'fs'
 import {Tree} from '../tree'
-import {cleanDir, createDir} from "../utils"
+import {cleanDir, createDir} from '../utils'
+import execa from 'execa'
+import {writeFile} from 'fs-extra'
 
 export class Shell {
     protected tempPath = path.join(__dirname, '..', '.cache')
@@ -21,21 +21,22 @@ export class Shell {
         })
     }
 
-    generate(tree: Tree): Shell {
+    async generate(tree: Tree): Promise<Shell> { // todo
         cleanDir(this.tempPath)
         createDir(this.tempPath)
 
-        this.overwriteMainEntryPoint(tree)
-
-        execSync(`ng new ${this.appName} --defaults --minimal --skip-git --skip-tests`, {
+        const args = '--defaults --minimal --skip-git --skip-tests'.split(' ')
+        await execa('ng', ['new', this.appName, ...args], {
             stdio: 'ignore',
-            cwd: this.tempPath
+            cwd: this.tempPath,
         })
+
+        await this.overwriteMainEntryPoint(tree)
 
         return this
     }
 
-    private overwriteMainEntryPoint(tree: Tree): void {
+    private async overwriteMainEntryPoint(tree: Tree): Promise<void> {
         const appImports = <string[]>[]
         const bootstrapModules = <string[]>[]
 
@@ -50,9 +51,10 @@ export class Shell {
             bootstrapModules.push(`platformBrowserDynamic().bootstrapModule(${moduleName}).catch(err => console.error(err))\n`)
         })
 
-        this.eta.renderFile(this.mainTsTemplate, {
+        // todo await
+        return this.eta.renderFile(this.mainTsTemplate, {
             appImports,
             bootstrapModules
-        }).then(content => writeFileSync(this.mainTsPath, content))
+        }).then(async content => await writeFile(this.mainTsPath, content,))
     }
 }

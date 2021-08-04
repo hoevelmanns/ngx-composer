@@ -1,12 +1,17 @@
-export const removeProps = (obj: { [key: string]: string }, ...keys) => keys.map(key => delete obj[<string>key]) && obj
-
-export const getArgOptions = (argv: any): any => {
-    const args = Object.entries(argv)
-        .filter(([key]) => !key.match('[$0_-]'))
-        .map(([key, val]) => ({[key]: val}))
-
-    return args.length > 0 ? args.reduce((acc, cur) => ({...acc, ...cur})) : {}
+interface Argv {
+    [key: string]: string
 }
 
-export const argOptionsToString = (argv: { [key: string]: string }) =>
-    Object.entries(argv).map(([key, val]) => `--${key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLocaleLowerCase()} ${val}`).join(' ').trim()
+export const removeProps = (obj: Argv, ...keys) => keys.map(key => delete obj[<string>key]) && obj
+
+export const transformArgOptions = (argv: Argv) => {
+    let args = Object.entries(argv)
+        .filter(([key]) => !key.match('[$0_-]'))
+        .map(([key, val]) => ({[key]: val}))
+        .reduce((acc, cur) => ({...acc, ...cur}), {})
+
+    return {
+        toString: (): string => Object.entries(args).map(([key, val]) => `--${key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLocaleLowerCase()} ${val}`).join(' ').trim(),
+        toObject: (): Argv => args
+    }
+}
