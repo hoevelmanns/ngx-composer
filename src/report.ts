@@ -4,6 +4,11 @@ import Workspace from './workspace/workspace'
 
 export class Report {
 
+    /**
+     * @deprecated
+     * @todo rename method to "showResults" and reuse the table
+     * @param workspaces
+     */
     listWorkspaces(workspaces: Workspace[]): void {
         console.log(chalk.bold.whiteBright(`Found ${workspaces.length} angular ` + (workspaces.length > 1 ? 'workspaces' : 'workspace') + ':'), '\n')
 

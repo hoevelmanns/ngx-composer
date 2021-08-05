@@ -51,10 +51,8 @@ export class Shell {
             bootstrapModules.push(`platformBrowserDynamic().bootstrapModule(${moduleName}).catch(err => console.error(err))\n`)
         })
 
-        // todo await
-        return this.eta.renderFile(this.mainTsTemplate, {
-            appImports,
-            bootstrapModules
-        }).then(async content => await writeFile(this.mainTsPath, content,))
+        const content = await this.eta.renderFile(this.mainTsTemplate, {appImports, bootstrapModules})
+
+        await writeFile(this.mainTsPath, content)
     }
 }
