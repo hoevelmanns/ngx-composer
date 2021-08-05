@@ -10,7 +10,7 @@ export class Report {
      * @param workspaces
      */
     listWorkspaces(workspaces: Workspace[]): void {
-        console.log(chalk.bold.whiteBright(`Found ${workspaces.length} angular ` + (workspaces.length > 1 ? 'workspaces' : 'workspace') + ':'), '\n')
+        console.log(chalk.bold.whiteBright(`Found ${workspaces.length} angular ` + (workspaces.length > 1 ? 'workspaces' : 'workspace')), '\n')
 
         const info = [
             [chalk.bold.whiteBright('Workspace Directory'), '|', chalk.bold.whiteBright('Default Project')]

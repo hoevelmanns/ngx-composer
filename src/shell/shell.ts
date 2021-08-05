@@ -4,14 +4,17 @@ import {Tree} from '../tree'
 import {cleanDir, createDir} from '../utils'
 import execa from 'execa'
 import {writeFile} from 'fs-extra'
+import {Ctx} from "../targets/types"
+import {Listr} from "listr2"
+import {ListrTaskResult} from "listr2/dist/interfaces/listr.interface"
 
 export class Shell {
-    protected tempPath = path.join(__dirname, '..', '.cache')
-    protected appName = 'ShellApp'
+    protected name = 'shell'
+    protected tempDir = path.join(__dirname, '..', '.cache')
+    protected path = path.join(this.tempDir, this.name)
     protected templateDir = path.join(process.cwd(), 'templates')
-    protected mainTsPath = path.join(this.tempPath, this.appName, 'src', 'main.ts')
+    protected mainTsPath = path.join(this.tempDir, this.name, 'src', 'main.ts')
     protected mainTsTemplate = 'main.ts.eta'
-    public appPath = path.join(this.tempPath, this.appName)
     private eta = require('eta')
 
     constructor() {
@@ -21,20 +24,35 @@ export class Shell {
         })
     }
 
-    async generate(tree: Tree): Promise<Shell> { // todo
-        cleanDir(this.tempPath)
-        createDir(this.tempPath)
-
+    async generate(tree: Tree): Promise<Shell> {
         const args = '--defaults --minimal --skip-git --skip-tests'.split(' ')
-        await execa('ng', ['new', this.appName, ...args], {
+
+        cleanDir(this.tempDir)
+        createDir(this.tempDir)
+
+        await execa('ng', ['new', this.name, ...args], {
             stdio: 'ignore',
-            cwd: this.tempPath,
+            cwd: this.tempDir,
         })
 
         await this.overwriteMainEntryPoint(tree)
 
         return this
     }
+
+    build = async (ctx: Ctx, tree: Tree): Promise<ListrTaskResult<Ctx>> =>
+        new Listr([
+            {
+                title: 'Generate...',
+                task: async () => await this.generate(tree)
+            },
+            {
+                title: 'Building...',
+                task: async () => await execa.command(`${ctx.buildCommand} --output-path=${ctx.outputPath}`, {
+                    cwd: this.path,
+                })
+            }
+        ])
 
     private async overwriteMainEntryPoint(tree: Tree): Promise<void> {
         const appImports = <string[]>[]
