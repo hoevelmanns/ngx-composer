@@ -1,8 +1,8 @@
 import { Ctx } from './context'
-import {Argv, Target } from './target'
+import {Argv, Command } from './command'
 
 export {
-    Target,
+    Command,
     Argv,
     Ctx,
 }

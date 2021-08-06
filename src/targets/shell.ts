@@ -4,10 +4,12 @@ import {Tree} from '../tree'
 import {cleanDir, createDir} from '../utils'
 import execa from 'execa'
 import {writeFile} from 'fs-extra'
-import {Ctx} from "../targets/types"
-import {Listr} from "listr2"
-import {ListrTaskResult} from "listr2/dist/interfaces/listr.interface"
+import {Ctx} from '../commands/types'
+import {Listr} from 'listr2'
+import {ListrTaskResult} from 'listr2/dist/interfaces/listr.interface'
+import {autoInjectable} from 'tsyringe'
 
+@autoInjectable()
 export class Shell {
     protected name = 'shell'
     protected tempDir = path.join(__dirname, '..', '.cache')

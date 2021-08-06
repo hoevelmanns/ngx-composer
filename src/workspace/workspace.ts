@@ -13,7 +13,7 @@ class Project {
         private workspaceDir: string
     ) {
         this.name = projectName
-        this.modulePath = path.join(process.cwd(), workspaceDir, this.projectConfig.sourceRoot, 'app', 'app.module')
+        this.modulePath = path.join(process.cwd(), workspaceDir, projectConfig.sourceRoot, 'app', 'app.module')
     }
 }
 
@@ -22,6 +22,7 @@ export default class Workspace {
     public config: IWorkspaceConfig
 
     constructor(private location: { dir: string, path: string }) {
+        this.init()
     }
 
     init = (): Workspace => {

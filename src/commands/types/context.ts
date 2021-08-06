@@ -9,8 +9,8 @@ export type Ctx = {
     chunks?: Chunks[]
     singleBuild?: boolean
     outputPath?: string
-    source?: string
+    directory?: string
     buildCommand?: string
     ngOptions?: string
-    concurrent?: boolean
+    concurrent?: boolean,
 }
