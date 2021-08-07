@@ -10,21 +10,20 @@ export class Tree {
     public workspaces = <Workspace[]>[]
 
     build(directory: string, ...exclude: string[]): Tree {
+        const ignore = ['**/{node_modules,vendor}/**'].concat(exclude.flat(1).map(ex => `**/${ex}/**`))
         const workspaces: string[] =
-            fg.sync(path.join(directory, 'angular.json'), {
-                ignore: ['**/node_modules/**', './node_modules/**', '**/vendor/**', './vendor/**']
-            })
+            fg.sync(path.join(directory, 'angular.json'), {ignore})
                 .map(ws => ws.replace('/angular.json', ''))
-                .filter(ws => !exclude.flat(1).filter(ex => ws.includes(ex)).length)
 
-        console.log({workspaces})
+        console.log(chalk.bold.cyanBright([
+            `Found ${workspaces.length} angular`,
+            workspaces.length > 1 ? 'workspaces' : 'workspace'
+        ].join(' ')), '\n')
 
-        console.log(chalk.bold.cyanBright(`Found ${workspaces.length} angular ` + (workspaces.length > 1 ? 'workspaces' : 'workspace')), '\n')
-
-        workspaces.map(appDir => this.workspaces.push(
+        workspaces.map(dir => this.workspaces.push(
             new Workspace({
-                dir: appDir,
-                path: path.join(appDir, 'angular.json'),
+                path: path.join(dir, 'angular.json'),
+                dir,
             })))
 
         if (!workspaces.length) {

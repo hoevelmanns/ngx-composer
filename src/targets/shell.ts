@@ -37,7 +37,7 @@ export class Shell {
             cwd: this.tempDir,
         })
 
-        await this.overwriteMainEntryPoint(tree)
+        await this.updateMainEntryPoint(tree)
 
         return this
     }
@@ -56,7 +56,11 @@ export class Shell {
             }
         ])
 
-    private async overwriteMainEntryPoint(tree: Tree): Promise<void> {
+    private async updateTsConfig() {
+        // todo updateTsConfig()
+    }
+
+    private async updateMainEntryPoint(tree: Tree): Promise<void> {
         const appImports = <string[]>[]
         const bootstrapModules = <string[]>[]
 

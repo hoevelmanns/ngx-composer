@@ -64,7 +64,7 @@ export class BuildCommand implements Command {
         argv.vendorChunk = argv?.vendorChunk !== 'false'
         argv.namedChunks = argv?.namedChunks !== 'false'
 
-        const ngOptions = transformArgOptions(removeProps(argv, 'exclude', ...Object.keys(ctx))).toString()
+        const ngOptions = transformArgOptions(removeProps(argv, 'exclude', 'e', 's', 'c', ...Object.keys(ctx))).toString()
 
         ctx.buildCommand = `ng build ${ngOptions}`.trim()
 
@@ -77,12 +77,12 @@ export class BuildCommand implements Command {
  * @see https://github.com/yargs/yargs/blob/master/docs/advanced.md#commands
  */
 export const command = 'build'
-export const describe = 'Builds the applications'
+export const describe = 'Build the angular application(s)'
 export const builder = {
     directory: {description: 'Directory or glob pattern to define the apps to process.', default: '**'},
-    exclude: {description: 'Excludes specified apps.'},
-    'single-build': {description: 'Only build the shell app.'},
-    concurrent: {description: 'Avoid processes the task concurrently.', default: true},
+    exclude: {description: 'Exclude specified path. Can be used many times.', alias: 'e'},
+    'single-build': {description: 'Only build the shell app.', alias: 's'},
+    concurrent: {description: 'Run the tasks concurrently.', default: true, alias: 'c'},
     'vendor-chunk': {description: 'Generate a seperate bundle containing only vendor libraries.', default: true},
     'named-chunks': {description: 'Use file name for lazy loaded chunks,', default: true},
 }
