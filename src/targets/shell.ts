@@ -1,25 +1,26 @@
-import path from 'path'
 import {Md5} from 'ts-md5'
-import {Tree} from '../tree'
 import {cleanDir, createDir} from '../utils'
 import execa from 'execa'
 import {writeFile} from 'fs-extra'
-import {Ctx} from '../commands/types'
 import {Listr} from 'listr2'
 import {ListrTaskResult} from 'listr2/dist/interfaces/listr.interface'
-import {autoInjectable} from 'tsyringe'
+import {autoInjectable, inject} from 'tsyringe'
+import {join} from "path"
+import {TreeService} from "../services"
+import {Tree} from "../services"
+import {Ctx} from "../services"
 
 @autoInjectable()
 export class Shell {
     protected name = 'shell'
-    protected tempDir = path.join(__dirname, '..', '.cache')
-    protected path = path.join(this.tempDir, this.name)
-    protected templateDir = path.join(process.cwd(), 'templates')
-    protected mainTsPath = path.join(this.tempDir, this.name, 'src', 'main.ts')
+    protected tempDir = join(__dirname, '..', '.cache')
+    protected path = join(this.tempDir, this.name)
+    protected templateDir = join(process.cwd(), 'templates')
+    protected mainTsPath = join(this.tempDir, this.name, 'src', 'main.ts')
     protected mainTsTemplate = 'main.ts.eta'
     private eta = require('eta')
 
-    constructor() {
+    constructor(@inject(TreeService) private treeService: TreeService) {
         this.eta.configure({
             autoEscape: false,
             views: this.templateDir
@@ -42,7 +43,7 @@ export class Shell {
         return this
     }
 
-    build = async (ctx: Ctx, tree: Tree): Promise<ListrTaskResult<Ctx>> =>
+    buildOrServe = async (ctx: Ctx, tree: Tree, serve?: boolean): Promise<ListrTaskResult<Ctx>> =>
         new Listr([
             {
                 title: 'Generate...',
@@ -50,10 +51,18 @@ export class Shell {
             },
             {
                 title: 'Building...',
-                task: async () => await execa.command(`${ctx.buildCommand} --output-path=${ctx.outputPath}`, {
+                enabled: () => !!!serve,
+                task: async () => await execa.command(`${ctx.ngCommand} --output-path=${ctx.outputPath}`, {
                     cwd: this.path,
                 })
-            }
+            },
+            {
+                title: 'Serving...',
+                enabled: () => !!serve,
+                task: async () => await execa.command(`${ctx.ngCommand} --output-path=${ctx.outputPath}`, {
+                    cwd: this.path,
+                })
+            },
         ])
 
     private async updateTsConfig() {

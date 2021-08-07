@@ -1,18 +1,21 @@
 import * as fg from 'fast-glob'
-import * as path from 'path'
 import chalk from 'chalk'
-import Workspace from './workspace/workspace'
 import {autoInjectable, singleton} from 'tsyringe'
+import isGlob from "is-glob"
+import {join} from "path"
+import {Workspace} from "./workspace"
 
 @singleton()
 @autoInjectable()
-export class Tree {
+export class TreeService {
     public workspaces = <Workspace[]>[]
 
-    build(directory: string, ...exclude: string[]): Tree {
-        const ignore = ['**/{node_modules,vendor}/**'].concat(exclude.flat(1).map(ex => `**/${ex}/**`))
+    build(directory: string, ...exclude: string[]): TreeService {
+        const ignore = ['**/{node_modules,vendor}/**']
+            .concat(exclude.flat(1).map(ex => isGlob(ex) ? ex : `**/${ex}/**`))
+
         const workspaces: string[] =
-            fg.sync(path.join(directory, 'angular.json'), {ignore})
+            fg.sync(join(directory, 'angular.json'), {ignore})
                 .map(ws => ws.replace('/angular.json', ''))
 
         console.log(chalk.bold.cyanBright([
@@ -22,7 +25,7 @@ export class Tree {
 
         workspaces.map(dir => this.workspaces.push(
             new Workspace({
-                path: path.join(dir, 'angular.json'),
+                path: join(dir, 'angular.json'),
                 dir,
             })))
 

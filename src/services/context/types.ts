@@ -7,10 +7,11 @@ interface Chunks {
 
 export type Ctx = {
     chunks?: Chunks[]
-    singleBuild?: boolean
+    singleBundle?: boolean
     outputPath?: string
     directory?: string
-    buildCommand?: string
+    ngCommand?: string,
     ngOptions?: string
     concurrent?: boolean,
 }
+export type Argv = { [key: string]: any }

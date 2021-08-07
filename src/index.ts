@@ -9,14 +9,12 @@ const yargs = require('yargs')
 
 console.log(chalk.bold.hex('9F2B68').inverse(`\n${cliName}\n`))
 
-yargs
-    .commands(require('./commands'))
-    .commands({
-        command: '*',
-        handler: () => yargs.showHelp()
-    })
-    .scriptName(cliBinName)
-    .usage(`$0 <cmd> [args]`)
-    .version(version)
-    .help()
-    .argv
+import ('./commands').then(commands =>
+    Object.entries(commands.default).map(command => yargs.command(command.pop()))
+    && yargs
+        .commands({command: '*', handler: () => yargs.showHelp()})
+        .scriptName(cliBinName)
+        .usage(`$0 <cmd> [args]`)
+        .version(version)
+        .help()
+        .argv)

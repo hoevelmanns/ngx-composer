@@ -3,5 +3,5 @@ import {Shell} from './shell'
 
 export {
     Shell,
-    Apps
+    Apps,
 }

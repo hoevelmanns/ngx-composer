@@ -6,6 +6,6 @@
         "moduleResolution": "node",
         "lib": ["es2019"],
         "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
     }
 }

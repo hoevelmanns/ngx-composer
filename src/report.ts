@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import {getBorderCharacters, table} from 'table'
-import Workspace from './workspace/workspace'
+import {Workspace} from "./services/tree/workspace"
 
 export class Report {
 

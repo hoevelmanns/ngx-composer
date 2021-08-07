@@ -1,7 +1,7 @@
 import {IWorkspaceConfig} from './types'
 import {readJSONSync} from 'fs-extra'
 import {IProjectConfig} from './types/workspace-config'
-import path from "path"
+import {join} from "path"
 
 class Project {
     public name: string
@@ -13,11 +13,11 @@ class Project {
         private workspaceDir: string
     ) {
         this.name = projectName
-        this.modulePath = path.join(process.cwd(), workspaceDir, projectConfig.sourceRoot, 'app', 'app.module')
+        this.modulePath = join(process.cwd(), workspaceDir, projectConfig.sourceRoot, 'app', 'app.module')
     }
 }
 
-export default class Workspace {
+export class Workspace {
     public defaultProject: Project
     public config: IWorkspaceConfig
 
