@@ -1,7 +1,6 @@
-import { TreeService } from "./tree";
-import { Tree } from "./types";
+import { TreeService } from './tree'
+import { Tree } from './types'
 
-export {
-    TreeService,
-    Tree,
-}
+export * from './types'
+
+export { TreeService, Tree }

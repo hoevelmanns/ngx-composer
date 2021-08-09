@@ -1,6 +1,3 @@
-import { IWorkspaceConfig } from "./workspace-config"
+import { IWorkspace } from './workspace-config'
 
-export {
-    IWorkspaceConfig,
-}
-
+export { IWorkspace }

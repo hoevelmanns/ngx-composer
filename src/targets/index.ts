@@ -1,7 +1,4 @@
-import {Apps} from './apps'
-import {Shell} from './shell'
+import { Apps } from './apps'
+import { Shell } from './shell'
 
-export {
-    Shell,
-    Apps,
-}
+export { Shell, Apps }

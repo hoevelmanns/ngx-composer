@@ -1,6 +1,3 @@
-import {Argv, Command } from './command'
+import { Argv, Command } from './command'
 
-export {
-    Command,
-    Argv,
-}
+export { Command, Argv }

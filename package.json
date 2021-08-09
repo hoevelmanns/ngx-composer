@@ -12,7 +12,9 @@
     "scripts": {
         "build": "ncc build src/index.ts -o ./dist",
         "watch": "ncc build src/index.ts -w -o ./dist",
-        "prepublish": "npm run build"
+        "prepublish": "npm run build",
+        "pretty": "prettier --check ./src",
+        "pretty-fix": "prettier --check ./src --write"
     },
     "author": "Marcelle Hövelmanns <mail@hoevelmanns.io>",
     "license": "ISC",
@@ -22,6 +24,9 @@
         "@types/yargs": "^17.0.2",
         "@vercel/ncc": "^0.24.1",
         "fast-glob": "^3.2.7",
+        "husky": "^7.0.1",
+        "lint-staged": "^11.1.2",
+        "prettier": "^2.3.2",
         "rollup": "^2.55.1",
         "typescript": "^4.3.5"
     },
@@ -38,5 +43,8 @@
         "ts-md5": "^1.2.9",
         "tsyringe": "^4.6.0",
         "yargs": "^17.1.0"
+    },
+    "lint-staged": {
+        "**/*": "prettier --write --ignore-unknown"
     }
 }

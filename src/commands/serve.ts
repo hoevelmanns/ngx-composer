@@ -1,12 +1,31 @@
-import {Argv, Command} from "./types"
-import {container, injectable} from "tsyringe"
+import { Argv, Command } from './types'
+import { container, inject, injectable } from 'tsyringe'
+import { Shell } from 'targets'
+import { ContextService, TreeService } from 'services'
+import { Listr } from 'listr2'
 
-// todo ServeCommand
 @injectable()
 class ServeCommand implements Command {
+  constructor(
+    @inject(Shell) private shell: Shell,
+    @inject(TreeService) private treeService: TreeService,
+    @inject(ContextService) private contextService: ContextService
+  ) {}
 
-    async run(argv: Argv): Promise<void> {
-    }
+  async run(argv: Argv): Promise<void> {
+    const tree = this.treeService.build(argv.directory, argv.exclude)
+    const tasks = new Listr(
+      {
+        task: async () => await this.shell.serve(tree),
+      },
+      {
+        registerSignalListeners: true,
+        ctx: this.contextService.buildContext(argv),
+      }
+    )
+
+    await tasks.run().catch(e => console.log('Error: ', e.stderr ?? e))
+  }
 }
 
 /**
@@ -16,7 +35,13 @@ class ServeCommand implements Command {
 export const command = 'serve'
 export const describe = 'Serve the angular application(s)'
 export const builder = {
-    directory: {description: 'Directory or glob (e.g. "custom/plugins/**") to define the apps to process.', default: '**'},
-    exclude: {description: 'Exclude specified path or glob. Can be used many times.', alias: 'e'},
+  directory: {
+    description: 'Directory or glob (e.g. "custom/plugins/**") to define the apps to process.',
+    default: '**',
+  },
+  exclude: {
+    description: 'Exclude specified path or glob. Can be used many times.',
+    alias: 'e',
+  },
 }
 export const handler = (argv: Argv) => container.resolve(ServeCommand).run(argv)

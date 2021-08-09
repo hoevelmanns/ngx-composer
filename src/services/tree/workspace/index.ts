@@ -1,5 +1,6 @@
-import { Workspace } from "./workspace";
+import { IWorkspace } from './types'
 
-export {
-    Workspace
-}
+export * from './types'
+export { Workspace } from './workspace'
+
+export { IWorkspace }

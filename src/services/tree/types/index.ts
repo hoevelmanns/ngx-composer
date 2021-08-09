@@ -1,7 +1,5 @@
-import { Tree } from "./tree"
+import { Tree } from './tree'
 
 export type Argv = { [key: string]: any }
 
-export {
-    Tree
-}
+export { Tree }
