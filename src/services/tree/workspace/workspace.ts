@@ -1,34 +1,25 @@
-import { IProject } from './types/workspace-config'
 import { join } from 'path'
 import { readJSONSync } from 'fs-extra'
-
-class Project {
-    public name: string
-    public modulePath: string
-
-    constructor(private projectConfig: IProject, public projectName: string, private workspaceDir: string) {
-        this.name = projectName
-        this.modulePath = join(process.cwd(), workspaceDir, projectConfig.sourceRoot, 'app', 'app.module')
-    }
-}
+import {Project} from "./project"
 
 export class Workspace {
     private _defaultProject: Project
-    private config: { [key: string]: any }
+    private angularConfig: { [key: string]: any }
 
-    constructor(private location: { dir: string; path: string }) {
+    constructor(private dir: string) {
         this.init()
     }
 
+
     init = (): Workspace => {
-        this.config = readJSONSync(this.location.path)
-        this.config.dir = this.location.dir
+        this.angularConfig = readJSONSync(join(this.dir, 'angular.json'))
 
         this._defaultProject = new Project(
-            this.config.projects[this.config.defaultProject],
-            this.config.defaultProject,
-            this.location.dir
+            this.angularConfig.projects[this.angularConfig.defaultProject],
+            this.angularConfig.defaultProject,
+            this.dir
         )
+
         return this
     }
 
@@ -37,6 +28,6 @@ export class Workspace {
     }
 
     get directory() {
-        return this.config.dir
+        return this.dir
     }
 }

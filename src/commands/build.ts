@@ -17,24 +17,22 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: 'Running ngcc...',
+                    title: 'Building applications...',
                     options: { showTimer: true },
                     enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: async (ctx: Ctx, task) => this.apps.ngcc(ctx, task),
-                },
-                {
-                    title: 'Building the collected workspace applications...',
-                    options: { showTimer: true },
-                    enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: async (ctx: Ctx, task) => this.apps.build(ctx, task),
+                    task: (ctx: Ctx, task) => this.apps.build(ctx, task), // && (task.title = "Applications successfully built")
                 },
                 {
                     title: 'Building shell...',
                     options: { showTimer: true },
-                    task: async (ctx: Ctx, task) => this.shell.build(task), // todo any
+                    task: (ctx: Ctx, task) => this.shell.build(task), // todo any
                 },
             ],
             {
+                exitOnError: true,
+                rendererOptions: {
+                    collapse: false,
+                },
                 registerSignalListeners: true,
                 ctx: this.contextService.buildContext(argv, builder),
             }

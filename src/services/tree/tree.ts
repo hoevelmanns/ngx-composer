@@ -35,14 +35,7 @@ export class TreeService {
 
         console.log(chalk.bold.cyanBright(msg))
 
-        workspaces.map(dir =>
-            this.workspaces.push(
-                new Workspace({
-                    path: join(dir, 'angular.json'),
-                    dir,
-                })
-            )
-        )
+        workspaces.map(dir => this.workspaces.push(new Workspace(dir)))
 
         if (!workspaces.length) {
             console.log(chalk.cyan('No angular workspaces found. Nothing to do.'))

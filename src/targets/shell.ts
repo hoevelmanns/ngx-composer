@@ -1,13 +1,13 @@
-import { Md5 } from 'ts-md5'
-import { cleanDir, createDir } from 'utils'
+import {Md5} from 'ts-md5'
+import {cleanDir, createDir} from 'utils'
 import execa from 'execa'
-import { writeFile } from 'fs-extra'
-import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
-import { autoInjectable, inject } from 'tsyringe'
-import { join } from 'path'
-import { Ctx, TreeService } from 'services'
-import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
-import { Listr } from 'listr2'
+import {writeFile} from 'fs-extra'
+import {ListrTaskResult} from 'listr2/dist/interfaces/listr.interface'
+import {autoInjectable, inject} from 'tsyringe'
+import {join} from 'path'
+import {Ctx, TreeService} from 'services'
+import {TaskWrapper} from 'listr2/dist/lib/task-wrapper'
+import {Listr} from 'listr2'
 
 @autoInjectable()
 export class Shell {
@@ -32,7 +32,7 @@ export class Shell {
                 title: 'Generating the shell...',
                 task: async (): Promise<void> => this.generate(),
             },
-            { ctx }
+            {ctx}
         )
             .run()
             .then(
@@ -44,8 +44,7 @@ export class Shell {
             )
 
     build = async (task: TaskWrapper<any, any>): Promise<ListrTaskResult<Ctx>> =>
-        task.newListr(
-            [
+        task.newListr([
                 {
                     title: 'Generating...',
                     task: async () => this.generate(),
@@ -58,7 +57,7 @@ export class Shell {
                         }),
                 },
             ],
-            { exitOnError: true }
+            {exitOnError: true}
         )
 
     private async generate(): Promise<void> {
@@ -86,7 +85,7 @@ export class Shell {
         const workspaces = this.treeService.getWorkspaces()
 
         workspaces.map(app => {
-            const { modulePath, name } = app.defaultProject
+            const {modulePath, name} = app.defaultProject
             const isModuleNameRedundant = workspaces.filter(w => w.defaultProject.name === name).length > 1
             const moduleName = isModuleNameRedundant ? `${name}_${Md5.hashStr(modulePath)}` : name
 

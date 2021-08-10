@@ -14,9 +14,7 @@ export class ContextService {
             outputPath: argv?.outputPath ? join(process.cwd(), argv.outputPath) : join(process.cwd(), 'dist'),
         }
 
-        const alias = Object.entries(builder)
-            .map(([_, val]) => val['alias'])
-            .filter(alias => typeof alias !== undefined)
+        const alias = Object.entries(builder).map(([_, val]) => val['alias'])
 
         const ngOptions = removeProps(argv, 'exclude', ...alias, ...excludeArgs, ...Object.keys(ctx))
 
