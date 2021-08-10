@@ -3,50 +3,47 @@ import chalk from 'chalk'
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Apps, Shell } from 'targets'
-import { ContextService, TreeService, Ctx } from 'services'
+import { ContextService, Ctx } from 'services'
 
 @injectable()
 class Build implements Command {
     constructor(
         @inject(Apps) private apps: Apps,
         @inject(Shell) private shell: Shell,
-        @inject(TreeService) private treeService: TreeService,
         @inject(ContextService) private contextService: ContextService
     ) {}
 
     async run(argv: Argv): Promise<void> {
-        const tree = this.treeService.build(argv.directory, argv.exclude)
-
         const tasks = new Listr(
             [
                 {
-                    title: 'Running ngcc',
+                    title: 'Running ngcc...',
                     options: { showTimer: true },
-                    task: async (ctx: Ctx, task) => this.apps.ngcc(ctx, tree, task),
+                    enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
+                    task: async (ctx: Ctx, task) => this.apps.ngcc(ctx, task),
                 },
                 {
                     title: 'Building the collected workspace applications...',
                     options: { showTimer: true },
-                    enabled: (ctx: Ctx): boolean => !ctx.singleBundle, // todo not working
-                    task: (ctx: Ctx, task) => this.apps.build(ctx, tree, task),
+                    enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
+                    task: async (ctx: Ctx, task) => this.apps.build(ctx, task),
                 },
                 {
-                    title: 'Building the shell...',
+                    title: 'Building shell...',
                     options: { showTimer: true },
-                    task: async (ctx: Ctx, task) => await this.shell.build(task, tree), // todo any
+                    task: async (ctx: Ctx, task) => this.shell.build(task), // todo any
                 },
             ],
             {
-                exitOnError: true,
                 registerSignalListeners: true,
-                ctx: this.contextService.buildContext(argv),
+                ctx: this.contextService.buildContext(argv, builder),
             }
         )
 
         await tasks
             .run()
             .then((ctx: Ctx) => console.log(chalk.green('Successfully built!'), { ctx }))
-            .catch(e => {
+            .catch(() => {
                 console.error('Error running build')
                 process.exit()
             })
@@ -69,7 +66,7 @@ export const builder = {
         description: 'Exclude specified path or glob. Can be used many times.',
         alias: 'e',
     },
-    'single-build': { description: 'Only build the shell app.', alias: 's' },
+    'single-bundle': { description: 'Only build the shell app.', alias: 's' },
     concurrent: {
         description: 'Run the tasks concurrently.',
         default: true,

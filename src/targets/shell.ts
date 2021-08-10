@@ -3,10 +3,11 @@ import { cleanDir, createDir } from 'utils'
 import execa from 'execa'
 import { writeFile } from 'fs-extra'
 import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
-import { autoInjectable } from 'tsyringe'
+import { autoInjectable, inject } from 'tsyringe'
 import { join } from 'path'
-import { Tree, Ctx } from 'services'
+import { Ctx, TreeService } from 'services'
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
+import { Listr } from 'listr2'
 
 @autoInjectable()
 export class Shell {
@@ -18,14 +19,49 @@ export class Shell {
     protected mainTsTemplate = 'main.ts.eta'
     private eta = require('eta')
 
-    constructor() {
+    constructor(@inject(TreeService) private treeService: TreeService) {
         this.eta.configure({
             autoEscape: false,
             views: this.templateDir,
         })
     }
 
-    async generate(tree: Tree): Promise<void> {
+    serve = async (ctx: Ctx): Promise<ListrTaskResult<Ctx>> =>
+        new Listr(
+            {
+                title: 'Generating the shell...',
+                task: async (): Promise<void> => this.generate(),
+            },
+            { ctx }
+        )
+            .run()
+            .then(
+                async () =>
+                    await execa('ng', ['serve', ...ctx.ngOptions.toArray()], {
+                        cwd: this.path,
+                        stdio: 'inherit',
+                    })
+            )
+
+    build = async (task: TaskWrapper<any, any>): Promise<ListrTaskResult<Ctx>> =>
+        task.newListr(
+            [
+                {
+                    title: 'Generating...',
+                    task: async () => this.generate(),
+                },
+                {
+                    title: 'Building...',
+                    task: async (ctx: Ctx) =>
+                        await execa('ng', ['build', '--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], {
+                            cwd: this.path,
+                        }),
+                },
+            ],
+            { exitOnError: true }
+        )
+
+    private async generate(): Promise<void> {
         const args = '--defaults --minimal --skip-git --skip-tests'.split(' ')
 
         cleanDir(this.tempDir)
@@ -36,56 +72,22 @@ export class Shell {
             cwd: this.tempDir,
         }).catch(e => new Error('Error generating shell:\n' + e.message))
 
-        await this.updateMainEntryPoint(tree)
-        await this.updateTsConfig(tree)
+        await this.updateMainEntryPoint()
+        await this.updateTsConfig()
     }
 
-    serve = async (task: TaskWrapper<any, any>, tree: Tree): Promise<ListrTaskResult<Ctx>> =>
-        task
-            .newListr({
-                title: 'Generating the shell...',
-                task: async (): Promise<void> => this.generate(tree),
-            })
-            .run()
-            .then(
-                async () =>
-                    await execa.command('ng serve', {
-                        cwd: this.path,
-                        stdio: 'inherit',
-                    })
-            )
-
-    build = async (task: TaskWrapper<any, any>, tree: Tree): Promise<ListrTaskResult<Ctx>> =>
-        task.newListr(
-            [
-                {
-                    title: 'Generating...',
-                    task: async () => this.generate(tree),
-                },
-                {
-                    title: 'Building...',
-                    task: async (ctx: Ctx) =>
-                        await execa('ng', ['build', '--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], {
-                            cwd: this.path,
-                        }).catch(e => {
-                            throw new Error('Error building shell:\n' + e.message)
-                        }),
-                },
-            ],
-            { exitOnError: true }
-        )
-
-    private async updateTsConfig(tree: Tree) {
+    private async updateTsConfig() {
         // todo updateTsConfig()
     }
 
-    private async updateMainEntryPoint(tree: Tree): Promise<void> {
+    private async updateMainEntryPoint(): Promise<void> {
         const appImports = <string[]>[]
         const bootstrapModules = <string[]>[]
+        const workspaces = this.treeService.getWorkspaces()
 
-        tree.workspaces.map(app => {
+        workspaces.map(app => {
             const { modulePath, name } = app.defaultProject
-            const isModuleNameRedundant = tree.workspaces.filter(w => w.defaultProject.name === name).length > 1
+            const isModuleNameRedundant = workspaces.filter(w => w.defaultProject.name === name).length > 1
             const moduleName = isModuleNameRedundant ? `${name}_${Md5.hashStr(modulePath)}` : name
 
             appImports.push(`import { AppModule as ${moduleName} } from '${modulePath}'\n`)

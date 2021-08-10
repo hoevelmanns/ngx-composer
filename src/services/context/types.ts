@@ -14,5 +14,7 @@ export type Ctx = {
     directory?: string
     ngOptions?: TransformArgOptions
     concurrent?: boolean
+    vendorChunk?: boolean
+    namedChunks?: boolean
 }
 export type Argv = { [key: string]: any }

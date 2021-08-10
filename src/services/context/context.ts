@@ -5,7 +5,7 @@ import { removeProps, transformArgOptions } from 'utils'
 
 @autoInjectable()
 export class ContextService {
-    buildContext = (argv: Argv): Ctx => {
+    buildContext = (argv: Argv, builder = <Argv>{}, ...excludeArgs): Ctx => {
         const ctx: Ctx = {
             chunks: [],
             directory: argv.directory,
@@ -14,10 +14,13 @@ export class ContextService {
             outputPath: argv?.outputPath ? join(process.cwd(), argv.outputPath) : join(process.cwd(), 'dist'),
         }
 
-        argv.vendorChunk = argv?.vendorChunk !== 'false'
-        argv.namedChunks = argv?.namedChunks !== 'false'
+        const alias = Object.entries(builder)
+            .map(([_, val]) => val['alias'])
+            .filter(alias => typeof alias !== undefined)
 
-        ctx.ngOptions = transformArgOptions(removeProps(argv, 'exclude', 'e', 's', 'c', ...Object.keys(ctx)))
+        const ngOptions = removeProps(argv, 'exclude', ...alias, ...excludeArgs, ...Object.keys(ctx))
+
+        ctx.ngOptions = transformArgOptions(ngOptions)
 
         return ctx
     }

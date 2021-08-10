@@ -1,32 +1,19 @@
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
-import { Shell } from 'targets'
-import { ContextService, Ctx, TreeService } from 'services'
-import { Listr } from 'listr2'
-import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
+import { Apps, Shell } from 'targets'
+import { ContextService } from 'services'
 
 @injectable()
 class Serve implements Command {
     constructor(
         @inject(Shell) private shell: Shell,
-        @inject(TreeService) private treeService: TreeService,
+        @inject(Apps) private apps: Apps,
         @inject(ContextService) private contextService: ContextService
     ) {}
 
     async run(argv: Argv): Promise<void> {
-        const tree = this.treeService.build(argv.directory, argv.exclude)
-
-        const tasks = new Listr(
-            {
-                task: async (ctx: Ctx, task: TaskWrapper<any, any>) => await this.shell.serve(task, tree),
-            },
-            {
-                registerSignalListeners: true,
-                ctx: this.contextService.buildContext(argv),
-            }
-        )
-
-        await tasks.run().catch(e => console.log('Error: ', e.stderr ?? e))
+        const ctx = this.contextService.buildContext(argv, builder)
+        await this.shell.serve(ctx).catch(e => console.log('Error: ', e.stderr ?? e))
     }
 }
 

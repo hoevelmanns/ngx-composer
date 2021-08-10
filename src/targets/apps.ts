@@ -1,34 +1,31 @@
 import execa from 'execa'
-import { autoInjectable } from 'tsyringe'
-import { Ctx, Tree } from 'services'
+import { autoInjectable, inject } from 'tsyringe'
+import { Ctx, TreeService } from 'services'
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
-import chalk from 'chalk'
 
 @autoInjectable()
 export class Apps {
-    ngcc = async (ctx: Ctx, tree: Tree, task: TaskWrapper<any, any>) =>
+    constructor(@inject(TreeService) private treeService: TreeService) {}
+
+    ngcc = async (ctx: Ctx, task: TaskWrapper<any, any>) =>
         task.newListr(
-            tree.workspaces.map(({ directory }) => ({
+            this.treeService.getWorkspaces().map(({ directory }) => ({
                 title: directory,
-                task: async () =>
-                    await execa.command('node_modules/.bin/ngcc --properties es2015 browser module main', {
-                        cwd: directory,
-                    }),
+                task: async () => execa.command('node_modules/.bin/ngcc', { cwd: directory }),
             })),
-            { concurrent: true }
+            { concurrent: false }
         )
 
-    build = async (ctx: Ctx, tree: Tree, task: TaskWrapper<any, any>) =>
+    build = async (ctx: Ctx, task: TaskWrapper<any, any>) =>
         task.newListr(
-            tree.workspaces.map(({ directory }) => ({
+            this.treeService.getWorkspaces().map(({ directory }) => ({
                 title: directory,
-                task: async (ctx: Ctx, task) =>
-                    await execa('ng', ['build', ...ctx.ngOptions.toArray()], {
+                task: async (ctx: Ctx) =>
+                    execa('ng', ['build', '--configuration', 'production', ...ctx.ngOptions.toArray()], {
                         cwd: directory,
-                    }).catch(e => {
-                        // todo search for ngcc lockfile error in message
+                    }) /*.catch(e => {
                         throw new Error(chalk.red('Failed: ') + `${chalk.bold(task.title)}\n` + e)
-                    }),
+                    }),*/,
             })),
             { concurrent: true }
         )

@@ -4,27 +4,36 @@ import { autoInjectable, singleton } from 'tsyringe'
 import isGlob from 'is-glob'
 import { join } from 'path'
 import { Workspace } from 'services'
+import yargs from 'yargs'
+import { Argv } from './types'
 
 @singleton()
 @autoInjectable()
 export class TreeService {
-    public workspaces = <Workspace[]>[]
+    private workspaces = <Workspace[]>[]
 
-    build(directory: string, ...exclude: string[]): TreeService {
-        const ignore = ['**/{node_modules,vendor}/**'].concat(
-            exclude.flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`))
+    constructor() {
+        this.build()
+    }
+
+    getWorkspaces = () => this.workspaces
+
+    private build(): TreeService {
+        const { directory, exclude } = <Argv>(
+            yargs(process.argv).options({ e: { alias: 'exclude' }, d: { alias: 'directory', default: '**' } }).argv
         )
-
+        const ignore = ['**/{node_modules,vendor}/**'].concat(
+            [exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`))
+        )
         const workspaces: string[] = fg
             .sync(join(directory, 'angular.json'), { ignore })
             .map(ws => ws.replace('/angular.json', ''))
 
-        console.log(
-            chalk.bold.cyanBright(
-                [`Found ${workspaces.length} angular`, workspaces.length > 1 ? 'workspaces' : 'workspace'].join(' ')
-            ),
-            '\n'
-        )
+        const msg = [`Found ${workspaces.length} angular`, workspaces.length === 1 ? 'workspace' : 'workspaces']
+            .join(' ')
+            .concat('\n')
+
+        console.log(chalk.bold.cyanBright(msg))
 
         workspaces.map(dir =>
             this.workspaces.push(
