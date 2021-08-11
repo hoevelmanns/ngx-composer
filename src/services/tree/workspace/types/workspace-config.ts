@@ -1,3 +1,5 @@
+import { IProject } from './project'
+
 export interface IProjectArchitect {
     build: {
         builder: string
@@ -31,7 +33,7 @@ export interface IProjectArchitect {
     }
 }
 
-export interface IProject {
+export interface ProjectConfig {
     projectType: 'application' | 'library'
     root: string
     sourceRoot: string
@@ -41,7 +43,6 @@ export interface IProject {
 }
 
 export interface IWorkspace {
-    getProjects(): IProject[]
     defaultProject: IProject
     directory: string
 }

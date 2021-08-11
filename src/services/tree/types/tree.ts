@@ -1,5 +1,5 @@
-import { Workspace } from 'services'
+import { IWorkspace } from 'services'
 
 export interface Tree {
-    workspaces: Workspace[]
+    workspaces: IWorkspace[]
 }

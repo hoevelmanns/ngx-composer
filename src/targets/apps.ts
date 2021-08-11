@@ -10,8 +10,8 @@ export class Apps {
         task.newListr(
             this.treeService.getWorkspaces().map(({ directory }) => ({
                 title: directory,
-                task: async () =>
-                    await execa('ng', ['build', '--configuration', 'production', ...ctx.ngOptions.toArray()], {
+                task: () =>
+                    execa('ng', ['build', ...ctx.ngOptions.toArray()], {
                         cwd: directory,
                     }),
             })),

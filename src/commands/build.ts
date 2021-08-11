@@ -16,12 +16,14 @@ class Build implements Command {
     async run(argv: Argv): Promise<void> {
         const tasks = new Listr(
             [
+                /** todo temp. disabled
                 {
                     title: 'Building applications...',
                     options: { showTimer: true },
                     enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
                     task: (ctx: Ctx, task) => this.apps.build(ctx, task), // && (task.title = "Applications successfully built")
                 },
+                 */
                 {
                     title: 'Building shell...',
                     options: { showTimer: true },
@@ -41,8 +43,8 @@ class Build implements Command {
         await tasks
             .run()
             .then((ctx: Ctx) => console.log(chalk.green('Successfully built!'), { ctx }))
-            .catch(() => {
-                console.error('Error running build')
+            .catch(e => {
+                console.error('Error running build', e)
                 process.exit()
             })
     }

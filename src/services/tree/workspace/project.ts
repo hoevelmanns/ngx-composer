@@ -1,19 +1,20 @@
-import {IProject} from "./types/workspace-config"
-import {join} from "path"
-import {ITsConfig, tsConfig} from "utils"
+import { ProjectConfig } from './types/workspace-config'
+import { join } from 'path'
+import { tsConfig, TsConfigContent } from 'utils'
 
 export class Project {
-    public name: string
-    public modulePath: string
-    private readonly tsConfig: ITsConfig
+    private readonly name: string
+    private readonly modulePath: string
+    private readonly tsConfig: TsConfigContent
 
-    constructor(
-        private projectConfig: IProject,
-        public projectName: string,
-        private workspaceDir: string
-    ) {
+    constructor(private projectConfig: ProjectConfig, public projectName: string, private workspaceDir: string) {
         this.name = projectName
         this.modulePath = join(process.cwd(), workspaceDir, projectConfig.sourceRoot, 'app', 'app.module')
-        this.tsConfig = tsConfig.find(workspaceDir, this.projectConfig.architect.build.options.tsConfig)
+        this.tsConfig = tsConfig.find(join(workspaceDir, this.projectConfig.architect.build.options.tsConfig)).getContent()
     }
+
+    getModulePath = (): string => this.modulePath
+    getName = (): string => this.name
+    getTsConfig = (): TsConfigContent => this.tsConfig
+    getWorkingDir = (): string => this.workspaceDir
 }

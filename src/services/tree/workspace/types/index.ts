@@ -1,3 +1,2 @@
-import { IWorkspace } from './workspace-config'
-
-export { IWorkspace }
+export { IWorkspace } from './workspace-config'
+export { IProject } from './project'

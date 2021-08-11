@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { readJSONSync } from 'fs-extra'
-import {Project} from "./project"
+import { Project } from './project'
 
 export class Workspace {
     private _defaultProject: Project
@@ -9,7 +9,6 @@ export class Workspace {
     constructor(private dir: string) {
         this.init()
     }
-
 
     init = (): Workspace => {
         this.angularConfig = readJSONSync(join(this.dir, 'angular.json'))
@@ -23,11 +22,11 @@ export class Workspace {
         return this
     }
 
-    get defaultProject() {
+    get defaultProject(): Project {
         return this._defaultProject
     }
 
-    get directory() {
+    get directory(): string {
         return this.dir
     }
 }

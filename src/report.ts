@@ -10,15 +10,13 @@ export class Report {
      */
     listWorkspaces(workspaces: IWorkspace[]): void {
         console.log(
-            chalk.bold.whiteBright(
-                `Found ${workspaces.length} angular ` + (workspaces.length > 1 ? 'workspaces' : 'workspace')
-            ),
+            chalk.bold.whiteBright(`Found ${workspaces.length} angular ` + (workspaces.length > 1 ? 'workspaces' : 'workspace')),
             '\n'
         )
 
         const info = [[chalk.bold.whiteBright('Workspace Directory'), '|', chalk.bold.whiteBright('Default Project')]]
 
-        workspaces.map(w => info.push([w.directory, '|', chalk.cyan(w.defaultProject.name)]))
+        workspaces.map(w => info.push([w.directory, '|', chalk.cyan(w.defaultProject.getName())]))
 
         this.outputTable(info)
     }
