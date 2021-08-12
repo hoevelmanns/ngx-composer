@@ -58,9 +58,7 @@ export class Shell {
         createDir(this.tempDir)
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
 
-        await this.ng
-            .new(this.name, args, this.tempDir, { stdio: 'inherit' })
-            .catch(e => new Error('Error generating shell:\n' + e.message))
+        await this.ng.new(this.name, args, this.tempDir).catch(e => new Error('Error generating shell:\n' + e.message))
 
         await this.clearBuildMaximumBudget()
         await this.overwriteMainFile()

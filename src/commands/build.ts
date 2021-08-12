@@ -17,7 +17,7 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: 'Running ngcc',
+                    title: 'Running ngcc...',
                     options: { showTimer: true },
                     enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
                     task: async (ctx: Ctx, task) => await this.apps.ngcc(ctx, task),
@@ -27,19 +27,16 @@ class Build implements Command {
                     options: { showTimer: true },
                     exitOnError: true,
                     enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: async (ctx: Ctx, task) => await this.apps.build(ctx, task), // && (task.title = "Applications successfully built")
+                    task: async (ctx: Ctx, task) => await this.apps.build(ctx, task),
                 },
                 {
                     title: 'Building shell...',
                     options: { showTimer: true },
-                    task: (ctx: Ctx, task) => this.shell.build(task), // todo any
+                    task: (ctx: Ctx, task) => this.shell.build(task),
                 },
             ],
             {
                 exitOnError: true,
-                rendererOptions: {
-                    collapse: false,
-                },
                 registerSignalListeners: true,
                 ctx: this.contextService.buildContext(argv, builder),
             }
@@ -59,7 +56,6 @@ class Build implements Command {
  * Command definition
  * @see https://github.com/yargs/yargs/blob/master/docs/advanced.md#commands
  */
-
 export const command = 'build'
 export const describe = 'Build the angular application(s)'
 export const builder = {

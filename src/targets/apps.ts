@@ -1,4 +1,3 @@
-import execa from 'execa'
 import { autoInjectable, inject } from 'tsyringe'
 import { Ctx, TreeService } from 'services'
 import { NgCliService } from 'services'
@@ -11,12 +10,7 @@ export class Apps {
         task.newListr(
             this.treeService.getWorkspaces().map(({ directory }) => ({
                 title: directory,
-                task: async () => {
-                    // todo NgCompilerService
-                    await execa('node_modules/.bin/ngcc', ['--properties', 'es2015', 'browser', 'module', 'main'], {
-                        cwd: directory,
-                    })
-                },
+                task: async () => this.ng.cc(directory),
             })),
             { concurrent: false }
         )
@@ -25,9 +19,8 @@ export class Apps {
         task.newListr(
             this.treeService.getWorkspaces().map(({ directory }) => ({
                 title: directory,
-                // retry: 30, // todo decrease retry?
                 task: async () => await this.ng.build(ctx.ngOptions.toArray(), directory),
             })),
-            { concurrent: true, exitOnError: false, rendererOptions: { collapse: false } }
+            { concurrent: true, exitOnError: false }
         )
 }

@@ -1,19 +1,6 @@
-import { readJSONSync } from 'fs-extra'
 import { join } from 'path'
-import { readFileSync, readSync } from 'fs'
+import { readFileSync } from 'fs'
 import stripJsonComments from 'strip-json-comments'
-
-export interface ITsConfig {
-    find(workingDir: string, configPath: string): TsConfig
-
-    getContent(): { [key: string]: any }
-
-    getPaths(): { [key: string]: string[] }
-
-    getFilePath(): string
-
-    getWorkDir(): string
-}
 
 export interface TsConfigContent {
     angularCompilerOptions: {
@@ -51,3 +38,15 @@ class TsConfig {
 }
 
 export const tsConfig = new TsConfig()
+
+export interface ITsConfig {
+    find(workDir: string, configPath: string): TsConfig
+
+    getContent(): { [key: string]: any }
+
+    getPaths(): { [key: string]: string[] }
+
+    getFilePath(): string
+
+    getWorkDir(): string
+}
