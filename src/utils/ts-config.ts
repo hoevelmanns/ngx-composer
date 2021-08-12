@@ -12,11 +12,15 @@ export interface ITsConfig {
 
     getFilePath(): string
 
-    getWorkingDir(): string
+    getWorkDir(): string
 }
 
 export interface TsConfigContent {
+    angularCompilerOptions: {
+        enableIvy: boolean
+    }
     compilerOptions: {
+        resolveJsonModule: boolean
         rootDir: ''
         paths: { [key: string]: string[] }
         baseUrl: string

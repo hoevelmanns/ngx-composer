@@ -1,6 +1,5 @@
 import { Md5 } from 'ts-md5'
 import { cleanDir, createDir, tsConfig } from 'utils'
-import execa from 'execa'
 import { writeFile, writeJSONSync } from 'fs-extra'
 import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
 import { autoInjectable, inject } from 'tsyringe'
@@ -8,7 +7,7 @@ import { join } from 'path'
 import { Ctx, TreeService } from 'services'
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
 import { Listr } from 'listr2'
-import { NgCliService } from '../services/tools/ng-cli'
+import { NgCliService } from 'services'
 
 @autoInjectable()
 export class Shell {
@@ -37,26 +36,18 @@ export class Shell {
             { ctx }
         )
             .run()
-            .then(() => this.ng.serve(ctx.ngOptions.toArray(), this.path))
+            .then(() => this.ng.serve(ctx.ngOptions.toArray(), this.path, { stdio: 'inherit' }))
 
     build = async (task: TaskWrapper<any, any>): Promise<ListrTaskResult<Ctx>> =>
         task.newListr(
             [
                 {
                     title: 'Generating...',
-                    task: async () => await this.generate(),
+                    task: async () => this.generate(),
                 },
                 {
                     title: 'Building...',
-                    //retry: 2,
-                    task: async (ctx: Ctx) => {
-                        const args = ['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()]
-                        return this.ng.build(args, this.path)
-                        /*
-                        return execa('ng', args, {
-                            cwd: this.path,
-                        })*/
-                    },
+                    task: async (ctx: Ctx) => this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path),
                 },
             ],
             { exitOnError: true }
@@ -65,8 +56,6 @@ export class Shell {
     private async generate(): Promise<void> {
         cleanDir(this.tempDir)
         createDir(this.tempDir)
-
-        // todo ? --package-manager npm
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
 
         await this.ng
@@ -79,13 +68,12 @@ export class Shell {
     }
 
     private async clearBuildMaximumBudget(): Promise<void> {
-        await this.ng.config('projects.shell.architect.build.configurations.production.budgets', '[]', this.path, { stdio: 'inherit' })
+        await this.ng.config('projects.shell.architect.build.configurations.production.budgets', '[]', this.path)
     }
 
     private async updateTsConfig(): Promise<void> {
         // todo merge origin with app config
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
-        console.log('origin', shellTsConfig.compilerOptions)
 
         this.treeService.getWorkspaces().map(workspace => {
             const filePath = workspace.defaultProject.getWorkingDir()
@@ -100,9 +88,7 @@ export class Shell {
             shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...(paths ?? {}) }
         })
 
-        console.log('after', shellTsConfig.compilerOptions)
-        // todo merge tsconfig node
-        shellTsConfig.compilerOptions['resolveJsonModule'] = true
+        shellTsConfig.compilerOptions.resolveJsonModule = true
 
         writeJSONSync(this.shellTsConfigPath, shellTsConfig, { spaces: '  ' })
     }

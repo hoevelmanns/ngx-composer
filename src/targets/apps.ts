@@ -1,7 +1,7 @@
 import execa from 'execa'
 import { autoInjectable, inject } from 'tsyringe'
 import { Ctx, TreeService } from 'services'
-import { NgCliService } from '../services/tools/ng-cli'
+import { NgCliService } from 'services'
 
 @autoInjectable()
 export class Apps {
@@ -28,6 +28,6 @@ export class Apps {
                 // retry: 30, // todo decrease retry?
                 task: async () => await this.ng.build(ctx.ngOptions.toArray(), directory),
             })),
-            { concurrent: false, exitOnError: false, rendererOptions: { collapse: false } }
+            { concurrent: true, exitOnError: false, rendererOptions: { collapse: false } }
         )
 }

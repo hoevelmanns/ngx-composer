@@ -26,7 +26,7 @@ export class NgCliService {
         })
 
     config = async (jsonPath: string, value: string, cwd?: string, options?: execa.Options) =>
-        execa(this.bin, ['config', ...[jsonPath, value].map(arg => '--' + arg)], {
+        execa(this.bin, ['config', '--jsonPath', jsonPath, '--value', value], {
             cwd,
             ...options,
         })
