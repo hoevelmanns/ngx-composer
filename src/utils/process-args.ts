@@ -19,7 +19,7 @@ export const transformArgOptions = (argv: Argv): TransformArgOptions => {
         .reduce((acc, cur) => ({ ...acc, ...cur }), {})
 
     return {
-        toString: (): string => Object.entries(args).join(' ').trim(),
+        toString: (): string => Object.entries(args).flat(1).join(' ').trim(),
         toArray: (): string[] => Object.entries(args).flat(1),
         toObject: (): Argv => args,
     }

@@ -1,13 +1,14 @@
-import {Md5} from 'ts-md5'
-import {cleanDir, createDir, tsConfig} from 'utils'
+import { Md5 } from 'ts-md5'
+import { cleanDir, createDir, tsConfig } from 'utils'
 import execa from 'execa'
-import {writeFile, writeJSONSync} from 'fs-extra'
-import {ListrTaskResult} from 'listr2/dist/interfaces/listr.interface'
-import {autoInjectable, inject} from 'tsyringe'
-import {join} from 'path'
-import {Ctx, TreeService} from 'services'
-import {TaskWrapper} from 'listr2/dist/lib/task-wrapper'
-import {Listr} from 'listr2'
+import { writeFile, writeJSONSync } from 'fs-extra'
+import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
+import { autoInjectable, inject } from 'tsyringe'
+import { join } from 'path'
+import { Ctx, TreeService } from 'services'
+import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
+import { Listr } from 'listr2'
+import { NgCliService } from '../services/tools/ng-cli'
 
 @autoInjectable()
 export class Shell {
@@ -20,7 +21,7 @@ export class Shell {
     protected mainTsTemplate = 'main.ts.eta'
     private eta = require('eta')
 
-    constructor(@inject(TreeService) private treeService: TreeService) {
+    constructor(@inject(TreeService) private treeService: TreeService, @inject(NgCliService) private ng: NgCliService) {
         this.eta.configure({
             autoEscape: false,
             views: this.templateDir,
@@ -33,75 +34,77 @@ export class Shell {
                 title: 'Generating the shell...',
                 task: () => this.generate(),
             },
-            {ctx}
+            { ctx }
         )
             .run()
-            .then(() =>
-                execa('ng', ['serve', ...ctx.ngOptions.toArray()], {
-                    cwd: this.path,
-                    stdio: 'inherit',
-                })
-            )
+            .then(() => this.ng.serve(ctx.ngOptions.toArray(), this.path))
 
     build = async (task: TaskWrapper<any, any>): Promise<ListrTaskResult<Ctx>> =>
         task.newListr(
             [
                 {
                     title: 'Generating...',
-                    task: async () => this.generate(),
+                    task: async () => await this.generate(),
                 },
                 {
                     title: 'Building...',
-                    task: async (ctx: Ctx) => // todo more elegant
-                        await execa('ng', ['config', '--json-path', 'projects.shell.architect.build.configurations.production.budgets', '--value', '[]'], {
+                    //retry: 2,
+                    task: async (ctx: Ctx) => {
+                        const args = ['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()]
+                        return this.ng.build(args, this.path)
+                        /*
+                        return execa('ng', args, {
                             cwd: this.path,
-                            stdio: "inherit"
-                        }).then(() => execa('ng', ['build', '--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], {
-                            cwd: this.path,
-                        }))
+                        })*/
+                    },
                 },
             ],
-            {exitOnError: true}
+            { exitOnError: true }
         )
 
     private async generate(): Promise<void> {
-        const args = '--defaults --minimal --skip-git --skip-tests'.split(' ')
-
         cleanDir(this.tempDir)
         createDir(this.tempDir)
 
-        await execa('ng', ['new', this.name, ...args], {
-            stdio: 'ignore',
-            cwd: this.tempDir,
-        }).catch(e => new Error('Error generating shell:\n' + e.message))
+        // todo ? --package-manager npm
+        const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
 
+        await this.ng
+            .new(this.name, args, this.tempDir, { stdio: 'inherit' })
+            .catch(e => new Error('Error generating shell:\n' + e.message))
+
+        await this.clearBuildMaximumBudget()
         await this.overwriteMainFile()
         await this.updateTsConfig()
     }
 
-    private async updateTsConfig() {
+    private async clearBuildMaximumBudget(): Promise<void> {
+        await this.ng.config('projects.shell.architect.build.configurations.production.budgets', '[]', this.path, { stdio: 'inherit' })
+    }
+
+    private async updateTsConfig(): Promise<void> {
         // todo merge origin with app config
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
-        console.log("origin", shellTsConfig.compilerOptions)
+        console.log('origin', shellTsConfig.compilerOptions)
 
-        console.log(this.treeService.getWorkspaces().map(t => {
-            const filePath = t.defaultProject.getWorkingDir()
+        this.treeService.getWorkspaces().map(workspace => {
+            const filePath = workspace.defaultProject.getWorkingDir()
+            const compilerOptionsPaths = workspace.defaultProject.getTsConfig().compilerOptions?.paths
 
-            const paths = Object
-                .entries(t.defaultProject.getTsConfig().compilerOptions.paths)
-                .map(([name, paths]) => ({[name]: paths.map(p => (join(process.cwd(), filePath, p).toString()))}))
-                .reduce((cur, acc) => ({...cur, ...acc}))
+            const paths =
+                compilerOptionsPaths &&
+                Object.entries(compilerOptionsPaths)
+                    .map(([name, paths]) => ({ [name]: paths.map(p => join(process.cwd(), filePath, p).toString()) }))
+                    .reduce((cur, acc) => ({ ...cur, ...acc }), {})
 
-            shellTsConfig.compilerOptions.paths = {...shellTsConfig.compilerOptions.paths, ...paths}
-        }))
+            shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...(paths ?? {}) }
+        })
 
-        console.log("after", shellTsConfig.compilerOptions)
-        // todo add compilerOptions.rootDir = '.' instead of using process.cwd()
+        console.log('after', shellTsConfig.compilerOptions)
+        // todo merge tsconfig node
         shellTsConfig.compilerOptions['resolveJsonModule'] = true
-        shellTsConfig['exclude'] = ['node_modules', 'tmp']
-        shellTsConfig['esModuleInterop'] = true
 
-        writeJSONSync(this.shellTsConfigPath, shellTsConfig, {spaces: '  '})
+        writeJSONSync(this.shellTsConfigPath, shellTsConfig, { spaces: '  ' })
     }
 
     private async overwriteMainFile(): Promise<void> {
@@ -110,7 +113,7 @@ export class Shell {
         const workspaces = this.treeService.getWorkspaces()
 
         workspaces.map(app => {
-            const {defaultProject} = app
+            const { defaultProject } = app
             const isModuleNameRedundant = workspaces.filter(w => w.defaultProject.getName() === defaultProject.getName()).length > 1
             const moduleName = isModuleNameRedundant
                 ? `${defaultProject.getName()}_${Md5.hashStr(defaultProject.getModulePath())}`
