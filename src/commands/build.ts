@@ -17,17 +17,11 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: 'Running ngcc...',
-                    options: { showTimer: true },
-                    enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: async (ctx: Ctx, task) => await this.apps.ngcc(ctx, task),
-                },
-                {
-                    title: 'Building applications...',
+                    title: 'Building packages...',
                     options: { showTimer: true },
                     exitOnError: true,
                     enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: async (ctx: Ctx, task) => await this.apps.build(ctx, task),
+                    task: (ctx: Ctx, task) => this.apps.build(ctx, task),
                 },
                 {
                     title: 'Building shell...',
@@ -62,6 +56,7 @@ export const builder = {
     directory: {
         description: 'Directory or glob (e.g. "custom/plugins/**") to define the apps to process.',
         default: '**',
+        alias: 'd',
     },
     exclude: {
         description: 'Exclude specified path or glob. Can be used many times.',

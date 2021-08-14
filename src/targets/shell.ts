@@ -1,6 +1,6 @@
 import { Md5 } from 'ts-md5'
 import { cleanDir, createDir, tsConfig } from 'utils'
-import { writeFile, writeJSONSync } from 'fs-extra'
+import { writeFile, writeJson } from 'fs-extra'
 import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
 import { autoInjectable, inject } from 'tsyringe'
 import { join } from 'path'
@@ -19,6 +19,7 @@ export class Shell {
     protected mainTsPath = join(this.tempDir, this.name, 'src', 'main.ts')
     protected mainTsTemplate = 'main.ts.eta'
     private eta = require('eta')
+    private isServing = false
 
     constructor(@inject(TreeService) private treeService: TreeService, @inject(NgCliService) private ng: NgCliService) {
         this.eta.configure({
@@ -30,8 +31,8 @@ export class Shell {
     serve = async (ctx: Ctx): Promise<ListrTaskResult<Ctx>> =>
         new Listr(
             {
-                title: 'Generating the shell...',
-                task: () => this.generate(),
+                title: 'Generating shell...',
+                task: () => (this.isServing = true) && this.generate(),
             },
             { ctx }
         )
@@ -43,10 +44,11 @@ export class Shell {
             [
                 {
                     title: 'Generating...',
-                    task: async () => this.generate(),
+                    task: async () => await this.generate(),
                 },
                 {
                     title: 'Building...',
+                    options: { persistentOutput: true },
                     task: async (ctx: Ctx) => this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path),
                 },
             ],
@@ -56,6 +58,7 @@ export class Shell {
     private async generate(): Promise<void> {
         cleanDir(this.tempDir)
         createDir(this.tempDir)
+
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
 
         await this.ng.new(this.name, args, this.tempDir).catch(e => new Error('Error generating shell:\n' + e.message))
@@ -65,12 +68,12 @@ export class Shell {
         await this.updateTsConfig()
     }
 
-    private async clearBuildMaximumBudget(): Promise<void> {
+    private clearBuildMaximumBudget = async (): Promise<void> => {
         await this.ng.config('projects.shell.architect.build.configurations.production.budgets', '[]', this.path)
+        await this.ng.config('projects.shell.architect.build.options.preserveSymlinks', 'true', this.path)
     }
 
     private async updateTsConfig(): Promise<void> {
-        // todo merge origin with app config
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
         this.treeService.getWorkspaces().map(workspace => {
@@ -86,9 +89,12 @@ export class Shell {
             shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...(paths ?? {}) }
         })
 
+        // todo ngx-composer config?
+        // todo merge origin with app config
+        shellTsConfig.compilerOptions.allowSyntheticDefaultImports = true
         shellTsConfig.compilerOptions.resolveJsonModule = true
 
-        writeJSONSync(this.shellTsConfigPath, shellTsConfig, { spaces: '  ' })
+        await writeJson(this.shellTsConfigPath, shellTsConfig, { spaces: '  ' })
     }
 
     private async overwriteMainFile(): Promise<void> {
@@ -102,8 +108,9 @@ export class Shell {
             const moduleName = isModuleNameRedundant
                 ? `${defaultProject.getName()}_${Md5.hashStr(defaultProject.getModulePath())}`
                 : defaultProject.getName()
+            const modulePath = this.isServing ? defaultProject.getModulePath() : defaultProject.getModuleDistPath()
 
-            appImports.push(`import { AppModule as ${moduleName} } from '${defaultProject.getModulePath()}'\n`)
+            appImports.push(`import { AppModule as ${moduleName} } from '${modulePath}'\n`)
             bootstrapModules.push(`platformBrowserDynamic().bootstrapModule(${moduleName}).catch(err => console.error(err))\n`)
         })
 

@@ -1,20 +1,13 @@
 import { autoInjectable, singleton } from 'tsyringe'
 import execa, { ExecaReturnValue } from 'execa'
 import { join } from 'path'
+import * as fg from 'fast-glob'
+import { rm } from 'fs-extra'
 
 @autoInjectable()
 @singleton()
 export class NgCliService {
-    private bin = join(__dirname, '..', 'node_modules/.bin/ng')
-
-    /**
-     * Angular Compatibility Compiler
-     */
-    cc = async (cwd: string, options?: execa.Options): Promise<ExecaReturnValue> =>
-        execa('node_modules/.bin/ngcc', ['--properties', 'es2015', 'browser', 'module', 'main'], {
-            cwd,
-            ...options,
-        })
+    private bin = join(__dirname, '../node_modules/.bin/ng')
 
     /**
      * Creates new Angular Workspace
@@ -38,10 +31,14 @@ export class NgCliService {
      * @param {execa.Options} options
      */
     build = async (args: string[], cwd?: string, options?: execa.Options): Promise<ExecaReturnValue> =>
-        execa(this.bin, ['build', ...args], {
-            cwd,
-            ...options,
-        })
+        await fg(join(process.cwd(), 'node_modules/**/__ngcc_lock_file__'))
+            .then(files => files.map(async lockFile => await rm(lockFile)))
+            .then(() =>
+                execa(this.bin, ['build', ...args], {
+                    cwd,
+                    ...options,
+                })
+            )
 
     /**
      * Serves an angular application
@@ -68,5 +65,6 @@ export class NgCliService {
         execa(this.bin, ['config', '--jsonPath', jsonPath, '--value', value], {
             cwd,
             ...options,
+            stdio: 'ignore',
         })
 }

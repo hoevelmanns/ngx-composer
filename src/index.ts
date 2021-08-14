@@ -3,11 +3,11 @@ import 'reflect-metadata'
 import chalk from 'chalk'
 import { bin, name, version } from '../package.json'
 
-const cliName = ` ${name.replace('-', ' ').toUpperCase()} `
+const cliName = `${name.replace('-', ' ').toUpperCase()}`
 const cliBinName = Object.keys(bin).shift()
 const yargs = require('yargs')
 
-console.log(chalk.bold.hex('9F2B68').inverse(`\n${cliName}\n`))
+console.log(chalk.bold.whiteBright(`\n${cliName}\n`))
 
 import('./commands').then(
     commands =>
