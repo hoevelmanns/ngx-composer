@@ -46,3 +46,5 @@ export interface IWorkspace {
     defaultProject: IProject
     directory: string
 }
+
+export type Workspaces = IWorkspace[]

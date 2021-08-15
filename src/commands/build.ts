@@ -1,9 +1,8 @@
 import { Listr } from 'listr2'
-import chalk from 'chalk'
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Apps, Shell } from 'targets'
-import { ContextService, Ctx } from 'services'
+import { ContextService, Ctx } from 'context'
 
 @injectable()
 class Build implements Command {
@@ -17,16 +16,18 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: 'Building packages...',
+                    title: 'Building packages',
                     options: { showTimer: true },
                     exitOnError: true,
                     enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: (ctx: Ctx, task) => this.apps.build(ctx, task),
+                    task: async (ctx: Ctx, task) => this.apps.build(ctx, task),
                 },
                 {
-                    title: 'Building shell...',
-                    options: { showTimer: true },
-                    task: (ctx: Ctx, task) => this.shell.build(task),
+                    title: 'Creating shell application...',
+                    task: async (_, task) => {
+                        await this.shell.generate()
+                        task.title = 'Shell application created.'
+                    },
                 },
             ],
             {
@@ -38,10 +39,9 @@ class Build implements Command {
 
         await tasks
             .run()
-            .then((ctx: Ctx) => console.log(chalk.green('Successfully built!'), { ctx }))
+            .then(async (ctx: Ctx) => await this.shell.build(ctx))
             .catch(e => {
-                console.error('Error running build', e.stderr ?? e)
-                process.exit()
+                console.error('Error running build', e.stderr ?? e.message)
             })
     }
 }
@@ -62,7 +62,7 @@ export const builder = {
         description: 'Exclude specified path or glob. Can be used many times.',
         alias: 'e',
     },
-    'single-bundle': { description: 'Only build the shell app.', alias: 's' },
+    'single-bundle': { description: 'Only build the shell app.', alias: 's', default: true },
     concurrent: {
         description: 'Run the tasks concurrently.',
         default: true,
@@ -74,7 +74,7 @@ export const builder = {
     },
     'named-chunks': {
         description: 'Use file name for lazy loaded chunks,',
-        default: true,
+        default: false,
     },
 }
 export const handler = (argv: Argv) => container.resolve(Build).run(argv)

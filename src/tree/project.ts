@@ -19,7 +19,7 @@ export class Project {
     getModuleDistPath = (): string => this.moduleDistPath
     getName = (): string => this.name
     getTsConfig = (): TsConfigContent => this.tsConfig
-    getWorkingDir = (): string => this.workspaceDir
+    getWorkspaceDir = (): string => this.workspaceDir
     getSourceRoot = (): string => this.projectConfig.sourceRoot
     getRoot = (): string => this.projectConfig.root
 }

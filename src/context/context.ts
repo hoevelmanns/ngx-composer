@@ -9,7 +9,7 @@ export class ContextService {
         const ctx: Ctx = {
             chunks: [],
             directory: argv.directory,
-            singleBundle: argv?.singleBundle,
+            singleBundle: argv?.singleBundle !== 'false',
             concurrent: argv?.concurrent !== 'false',
             outputPath: argv?.outputPath ? join(process.cwd(), argv.outputPath) : join(process.cwd(), 'dist'),
         }

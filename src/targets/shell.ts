@@ -1,13 +1,11 @@
-import { Md5 } from 'ts-md5'
 import { cleanDir, createDir, tsConfig } from 'utils'
 import { writeFile, writeJson } from 'fs-extra'
 import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
 import { autoInjectable, inject } from 'tsyringe'
 import { join } from 'path'
-import { Ctx, TreeService } from 'services'
-import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
-import { Listr } from 'listr2'
-import { NgCliService } from 'services'
+import { TreeService } from 'tree'
+import { NgCliService } from 'tools'
+import { Ctx } from 'context'
 
 @autoInjectable()
 export class Shell {
@@ -20,6 +18,7 @@ export class Shell {
     protected mainTsTemplate = 'main.ts.eta'
     private eta = require('eta')
     private isServing = false
+    private workspaces = this.treeService.getWorkspaces()
 
     constructor(@inject(TreeService) private treeService: TreeService, @inject(NgCliService) private ng: NgCliService) {
         this.eta.configure({
@@ -28,57 +27,39 @@ export class Shell {
         })
     }
 
-    serve = async (ctx: Ctx): Promise<ListrTaskResult<Ctx>> =>
-        new Listr(
-            {
-                title: 'Generating shell...',
-                task: () => (this.isServing = true) && this.generate(),
-            },
-            { ctx }
-        )
-            .run()
-            .then(() => this.ng.serve(ctx.ngOptions.toArray(), this.path, { stdio: 'inherit' }))
+    async serve(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
+        this.isServing = true
+        return this.ng.serve(ctx.ngOptions.toArray(), this.path, { stdio: 'inherit' })
+    }
 
-    build = async (task: TaskWrapper<any, any>): Promise<ListrTaskResult<Ctx>> =>
-        task.newListr(
-            [
-                {
-                    title: 'Generating...',
-                    task: async () => await this.generate(),
-                },
-                {
-                    title: 'Building...',
-                    options: { persistentOutput: true },
-                    task: async (ctx: Ctx) => this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path),
-                },
-            ],
-            { exitOnError: true }
-        )
+    async build(ctx: Ctx) {
+        await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
+    }
 
-    private async generate(): Promise<void> {
+    async generate(): Promise<void> {
         cleanDir(this.tempDir)
         createDir(this.tempDir)
 
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
 
-        await this.ng.new(this.name, args, this.tempDir).catch(e => new Error('Error generating shell:\n' + e.message))
+        await this.ng
+            .new(this.name, {
+                args,
+                cwd: this.tempDir,
+            })
+            .catch(e => new Error('Error generating shell:\n' + e.message))
 
-        await this.clearBuildMaximumBudget()
+        await this.ng.setUnlimitedBudget(this.name, this.path)
         await this.overwriteMainFile()
         await this.updateTsConfig()
-    }
-
-    private clearBuildMaximumBudget = async (): Promise<void> => {
-        await this.ng.config('projects.shell.architect.build.configurations.production.budgets', '[]', this.path)
-        await this.ng.config('projects.shell.architect.build.options.preserveSymlinks', 'true', this.path)
     }
 
     private async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
-        this.treeService.getWorkspaces().map(workspace => {
-            const filePath = workspace.defaultProject.getWorkingDir()
-            const compilerOptionsPaths = workspace.defaultProject.getTsConfig().compilerOptions?.paths
+        this.workspaces.map(({ defaultProject }) => {
+            const filePath = defaultProject.getWorkspaceDir()
+            const compilerOptionsPaths = defaultProject.getTsConfig().compilerOptions?.paths
 
             const paths =
                 compilerOptionsPaths &&
@@ -91,6 +72,7 @@ export class Shell {
 
         // todo ngx-composer config?
         // todo merge origin with app config
+        // todo write function to adding config props
         shellTsConfig.compilerOptions.allowSyntheticDefaultImports = true
         shellTsConfig.compilerOptions.resolveJsonModule = true
 
@@ -100,15 +82,10 @@ export class Shell {
     private async overwriteMainFile(): Promise<void> {
         const appImports = <string[]>[]
         const bootstrapModules = <string[]>[]
-        const workspaces = this.treeService.getWorkspaces()
 
-        workspaces.map(app => {
-            const { defaultProject } = app
-            const isModuleNameRedundant = workspaces.filter(w => w.defaultProject.getName() === defaultProject.getName()).length > 1
-            const moduleName = isModuleNameRedundant
-                ? `${defaultProject.getName()}_${Md5.hashStr(defaultProject.getModulePath())}`
-                : defaultProject.getName()
-            const modulePath = this.isServing ? defaultProject.getModulePath() : defaultProject.getModuleDistPath()
+        this.workspaces.map(({ defaultProject }) => {
+            const modulePath = defaultProject.getModulePath()
+            const moduleName = defaultProject.getWorkspaceDir().split('/').concat(defaultProject.getName()).join('_')
 
             appImports.push(`import { AppModule as ${moduleName} } from '${modulePath}'\n`)
             bootstrapModules.push(`platformBrowserDynamic().bootstrapModule(${moduleName}).catch(err => console.error(err))\n`)

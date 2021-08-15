@@ -1,7 +1,9 @@
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Apps, Shell } from 'targets'
-import { ContextService } from 'services'
+import { removeNgccLockFiles } from 'tools'
+import { Listr } from 'listr2'
+import { ContextService } from 'context'
 
 @injectable()
 class Serve implements Command {
@@ -13,7 +15,26 @@ class Serve implements Command {
 
     async run(argv: Argv): Promise<void> {
         const ctx = this.contextService.buildContext(argv, builder)
-        await this.shell.serve(ctx).catch(e => console.log('Error: ', e.stderr ?? e))
+
+        await removeNgccLockFiles()
+
+        const tasks = new Listr(
+            {
+                title: 'Creating shell application...',
+                task: async (_, task) => {
+                    await this.shell.generate()
+                    task.title = 'Shell application created.'
+                },
+            },
+            { ctx }
+        )
+
+        await tasks
+            .run()
+            .then(() => this.shell.serve(ctx))
+            .catch(e => {
+                console.error('Error serving app', e.stderr ?? e.message)
+            })
     }
 }
 
@@ -25,6 +46,7 @@ export const command = 'serve'
 export const describe = 'Serve the angular application(s)'
 export const builder = {
     directory: {
+        alias: 'd',
         description: 'Directory or glob (e.g. "custom/plugins/**") to define the apps to process.',
         default: '**',
     },

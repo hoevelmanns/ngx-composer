@@ -5,7 +5,7 @@ export interface IProject {
     getModulePath(): string
     getModuleDistPath(): string
     getTsConfig(): TsConfigContent
-    getWorkingDir(): string
+    getWorkspaceDir(): string
     getSourceRoot(): string
     getRoot(): string
 }

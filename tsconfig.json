@@ -10,9 +10,11 @@
         "baseUrl": ".",
         "paths": {
             "utils": ["src/utils"],
-            "services": ["src/services"],
+            "context": ["src/context"],
             "targets": ["src/targets"],
-            "commands": ["src/commands"]
+            "commands": ["src/commands"],
+            "tree": ["src/tree"],
+            "tools": ["src/tools"]
         }
     }
 }

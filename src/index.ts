@@ -7,7 +7,7 @@ const cliName = `${name.replace('-', ' ').toUpperCase()}`
 const cliBinName = Object.keys(bin).shift()
 const yargs = require('yargs')
 
-console.log(chalk.bold.whiteBright(`\n${cliName}\n`))
+console.log(chalk.bold.whiteBright(`\n${cliName} ${version}\n`))
 
 import('./commands').then(
     commands =>

@@ -1,29 +1,28 @@
 import { autoInjectable, inject } from 'tsyringe'
-import { Ctx, TreeService } from 'services'
-import { NgCliService } from 'services'
-import { NgPackagrService } from '../services/tools'
-import { join } from 'path'
+import { TreeService } from 'tree'
+import { NgCliService, NgPackagrService } from 'tools'
+import { Ctx } from 'context'
 
 @autoInjectable()
 export class Apps {
+    private workspaces = this.tree.getWorkspaces()
+
     constructor(
         @inject(TreeService) private tree: TreeService,
         @inject(NgCliService) private ng: NgCliService,
         @inject(NgPackagrService) private packagr: NgPackagrService
     ) {}
 
-    build = (ctx: Ctx, task) =>
-        task.newListr(
-            this.tree.getWorkspaces().map(({ directory, defaultProject }) => ({
+    async build(ctx: Ctx, task) {
+        return task.newListr(
+            this.workspaces.map(({ directory, defaultProject }) => ({
                 title: directory,
-                exitOnError: true,
-                task: async () =>
-                    await this.packagr.build({
-                        cwd: directory,
-                        tsconfigPath: join(defaultProject.getRoot(), 'tsconfig.app.json').toString(),
-                        appModulePath: defaultProject.getModulePath(),
-                    }),
+                task: async () => {
+                    await this.ng.setUnlimitedBudget(defaultProject.getName(), directory) // todo
+                    await this.ng.build(ctx.ngOptions.toArray(), directory)
+                },
             })),
-            { concurrent: false, exitOnError: true }
+            { concurrent: false }
         )
+    }
 }

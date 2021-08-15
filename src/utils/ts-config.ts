@@ -9,7 +9,7 @@ export interface TsConfigContent {
     compilerOptions: {
         resolveJsonModule: boolean
         rootDir: ''
-        paths: { [key: string]: string[] }
+        paths?: { [key: string]: string[] }
         baseUrl: string
         [key: string]: any
     }
