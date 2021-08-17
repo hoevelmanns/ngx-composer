@@ -3,43 +3,41 @@ import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Apps, Shell } from 'targets'
 import { ContextService, Ctx } from 'context'
+import { removeNgccLockFiles } from 'tools'
 
 @injectable()
 class Build implements Command {
     constructor(
         @inject(Apps) private apps: Apps,
         @inject(Shell) private shell: Shell,
-        @inject(ContextService) private contextService: ContextService
+        @inject(ContextService) private context: ContextService
     ) {}
 
     async run(argv: Argv): Promise<void> {
         const tasks = new Listr(
             [
                 {
-                    title: 'Building packages',
+                    title: 'Building packages...',
                     options: { showTimer: true },
                     exitOnError: true,
                     enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: async (ctx: Ctx, task) => this.apps.build(ctx, task),
+                    task: async (ctx: Ctx, task) => this.apps.build(ctx, task).then(() => (task.title = 'Packages built.')),
                 },
                 {
                     title: 'Creating shell application...',
-                    task: async (_, task) => {
-                        await this.shell.generate()
-                        task.title = 'Shell application created.'
-                    },
+                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell application created.')),
                 },
             ],
             {
                 exitOnError: true,
                 registerSignalListeners: true,
-                ctx: this.contextService.buildContext(argv, builder),
+                ctx: this.context.buildContext(argv, builder),
             }
         )
 
         await tasks
             .run()
-            .then(async (ctx: Ctx) => await this.shell.build(ctx))
+            .then(async (ctx: Ctx) => this.shell.build(ctx))
             .catch(e => {
                 console.error('Error running build', e.stderr ?? e.message)
             })

@@ -1,4 +1,4 @@
-import { cleanDir, createDir, tsConfig } from 'utils'
+import { createDir, tsConfig } from 'utils'
 import { writeFile, writeJson } from 'fs-extra'
 import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
 import { autoInjectable, inject } from 'tsyringe'
@@ -6,6 +6,7 @@ import { join } from 'path'
 import { TreeService } from 'tree'
 import { NgCliService } from 'tools'
 import { Ctx } from 'context'
+import { existsSync } from 'fs'
 
 @autoInjectable()
 export class Shell {
@@ -17,7 +18,6 @@ export class Shell {
     protected mainTsPath = join(this.tempDir, this.name, 'src', 'main.ts')
     protected mainTsTemplate = 'main.ts.eta'
     private eta = require('eta')
-    private isServing = false
     private workspaces = this.treeService.getWorkspaces()
 
     constructor(@inject(TreeService) private treeService: TreeService, @inject(NgCliService) private ng: NgCliService) {
@@ -28,7 +28,6 @@ export class Shell {
     }
 
     async serve(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
-        this.isServing = true
         return this.ng.serve(ctx.ngOptions.toArray(), this.path, { stdio: 'inherit' })
     }
 
@@ -37,10 +36,9 @@ export class Shell {
     }
 
     async generate(): Promise<void> {
-        cleanDir(this.tempDir)
-        createDir(this.tempDir)
-
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
+
+        if (!existsSync(this.tempDir)) createDir(this.tempDir)
 
         await this.ng
             .new(this.name, {
@@ -50,16 +48,16 @@ export class Shell {
             .catch(e => new Error('Error generating shell:\n' + e.message))
 
         await this.ng.setUnlimitedBudget(this.name, this.path)
-        await this.overwriteMainFile()
+        await this.updateMain()
         await this.updateTsConfig()
     }
 
     private async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
-        this.workspaces.map(({ defaultProject }) => {
-            const filePath = defaultProject.getWorkspaceDir()
-            const compilerOptionsPaths = defaultProject.getTsConfig().compilerOptions?.paths
+        this.workspaces.map(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
+            const filePath = getWorkspaceDir()
+            const compilerOptionsPaths = getTsConfig().compilerOptions?.paths
 
             const paths =
                 compilerOptionsPaths &&
@@ -79,13 +77,13 @@ export class Shell {
         await writeJson(this.shellTsConfigPath, shellTsConfig, { spaces: '  ' })
     }
 
-    private async overwriteMainFile(): Promise<void> {
+    private async updateMain(): Promise<void> {
         const appImports = <string[]>[]
         const bootstrapModules = <string[]>[]
 
-        this.workspaces.map(({ defaultProject }) => {
-            const modulePath = defaultProject.getModulePath()
-            const moduleName = defaultProject.getWorkspaceDir().split('/').concat(defaultProject.getName()).join('_')
+        this.workspaces.map(({ defaultProject: { getName, getModulePath, getWorkspaceDir } }) => {
+            const modulePath = getModulePath()
+            const moduleName = getWorkspaceDir().replace(/-/g, '/').split('/').concat(getName()).join('_')
 
             appImports.push(`import { AppModule as ${moduleName} } from '${modulePath}'\n`)
             bootstrapModules.push(`platformBrowserDynamic().bootstrapModule(${moduleName}).catch(err => console.error(err))\n`)

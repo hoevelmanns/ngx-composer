@@ -28,7 +28,7 @@ export class TreeService {
             .sync(join(directory, 'angular.json'), { ignore })
             .map(ws => ws.replace('/angular.json', ''))
 
-        workspacesPaths.map(dir => this.workspaces.push(new Workspace(dir)))
+        this.workspaces = workspacesPaths.map(dir => new Workspace(dir))
 
         this.listWorkspaces(this.workspaces)
 

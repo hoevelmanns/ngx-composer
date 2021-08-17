@@ -10,13 +10,11 @@ class Serve implements Command {
     constructor(
         @inject(Shell) private shell: Shell,
         @inject(Apps) private apps: Apps,
-        @inject(ContextService) private contextService: ContextService
+        @inject(ContextService) private context: ContextService
     ) {}
 
     async run(argv: Argv): Promise<void> {
-        const ctx = this.contextService.buildContext(argv, builder)
-
-        await removeNgccLockFiles()
+        const ctx = this.context.buildContext(argv, builder)
 
         const tasks = new Listr(
             {

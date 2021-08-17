@@ -6,12 +6,13 @@ import { removeProps, transformArgOptions } from 'utils'
 @autoInjectable()
 export class ContextService {
     buildContext = (argv: Argv, builder = <Argv>{}, ...excludeArgs): Ctx => {
+        const { directory, singleBundle, concurrent, outputPath } = argv
         const ctx: Ctx = {
             chunks: [],
-            directory: argv.directory,
-            singleBundle: argv?.singleBundle !== 'false',
-            concurrent: argv?.concurrent !== 'false',
-            outputPath: argv?.outputPath ? join(process.cwd(), argv.outputPath) : join(process.cwd(), 'dist'),
+            directory,
+            singleBundle: singleBundle !== 'false',
+            concurrent: concurrent !== 'false',
+            outputPath: outputPath ? join(process.cwd(), outputPath) : join(process.cwd(), 'dist'),
         }
 
         const alias = Object.entries(builder).map(([_, val]) => val['alias'])
