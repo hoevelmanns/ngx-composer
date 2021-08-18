@@ -7,7 +7,7 @@ Composes multiple Angular workspaces for building, serving and more without an o
 ## Motivation
 
 TODO
-- [ ] add dependency composer -> collect package.json of packages and harmonize the dependency version to the latest version and check for breaking changes
+- [ ] add peerDependency check!
 - [ ] add config.composer.json for configure the shell angular version and other things
 - [ ] add tsconfig merger packages & shell
 - [ ] support nx workspace with packagr

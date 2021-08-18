@@ -1,28 +1,16 @@
 import { Listr } from 'listr2'
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
-import { Apps, Shell } from 'targets'
+import { Shell } from 'shell'
 import { ContextService, Ctx } from 'context'
-import { removeNgccLockFiles } from 'tools'
 
 @injectable()
 class Build implements Command {
-    constructor(
-        @inject(Apps) private apps: Apps,
-        @inject(Shell) private shell: Shell,
-        @inject(ContextService) private context: ContextService
-    ) {}
+    constructor(@inject(Shell) private shell: Shell, @inject(ContextService) private context: ContextService) {}
 
     async run(argv: Argv): Promise<void> {
         const tasks = new Listr(
             [
-                {
-                    title: 'Building packages...',
-                    options: { showTimer: true },
-                    exitOnError: true,
-                    enabled: (ctx: Ctx): boolean => !ctx.singleBundle,
-                    task: async (ctx: Ctx, task) => this.apps.build(ctx, task).then(() => (task.title = 'Packages built.')),
-                },
                 {
                     title: 'Creating shell application...',
                     task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell application created.')),
@@ -30,6 +18,7 @@ class Build implements Command {
             ],
             {
                 exitOnError: true,
+                rendererOptions: { showErrorMessage: false },
                 registerSignalListeners: true,
                 ctx: this.context.buildContext(argv, builder),
             }
@@ -39,7 +28,8 @@ class Build implements Command {
             .run()
             .then(async (ctx: Ctx) => this.shell.build(ctx))
             .catch(e => {
-                console.error('Error running build', e.stderr ?? e.message)
+                console.error('Error running build:')
+                console.error(e.stderr ?? e.message)
             })
     }
 }

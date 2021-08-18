@@ -1,4 +1,4 @@
-import { ProjectConfig } from './types/workspace-config'
+import { ProjectConfig } from './types'
 import { join } from 'path'
 import { tsConfig, TsConfigContent } from 'utils'
 
@@ -14,6 +14,8 @@ export class Project {
         this.moduleDistPath = join(process.cwd(), workspaceDir, projectConfig.architect.build.options.outputPath).toString()
         this.tsConfig = tsConfig.find(join(workspaceDir, this.projectConfig.architect.build.options.tsConfig)).getContent()
     }
+
+    static load = (...args: ConstructorParameters<typeof Project>) => new Project(...args)
 
     getModulePath = (): string => this.modulePath
     getModuleDistPath = (): string => this.moduleDistPath

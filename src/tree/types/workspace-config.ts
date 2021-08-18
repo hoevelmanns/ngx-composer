@@ -1,5 +1,3 @@
-import { IProject } from './project'
-
 export interface IProjectArchitect {
     build: {
         builder: string
@@ -41,10 +39,3 @@ export interface ProjectConfig {
     architect: IProjectArchitect
     name: string
 }
-
-export interface IWorkspace {
-    defaultProject: IProject
-    directory: string
-}
-
-export type Workspaces = IWorkspace[]

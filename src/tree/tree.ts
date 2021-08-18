@@ -4,9 +4,9 @@ import { autoInjectable, singleton } from 'tsyringe'
 import isGlob from 'is-glob'
 import { join } from 'path'
 import yargs from 'yargs'
-import { Argv, Workspaces } from './types'
-import { Workspace } from './workspace'
-import { getBorderCharacters, table } from 'table' // todo
+import { Argv } from './types'
+import { Workspace, Workspaces } from './workspace'
+import { getBorderCharacters, table } from 'table'
 
 @singleton()
 @autoInjectable()
@@ -28,38 +28,35 @@ export class TreeService {
             .sync(join(directory, 'angular.json'), { ignore })
             .map(ws => ws.replace('/angular.json', ''))
 
-        this.workspaces = workspacesPaths.map(dir => new Workspace(dir))
-
-        this.listWorkspaces(this.workspaces)
+        this.workspaces = workspacesPaths.map(dir => Workspace.load(dir))
 
         if (!workspacesPaths.length) {
             console.log(chalk.cyan('No angular workspaces found. Nothing to do.'))
             process.exit(0)
         }
 
+        this.listWorkspaces(this.workspaces)
+
         return this
     }
 
     private listWorkspaces(workspaces: Workspaces): void {
-        const msg = [`Found ${workspaces.length} angular`, workspaces.length === 1 ? 'workspace' : 'workspaces'].join(' ').concat('\n')
+        const msgFoundedWorkspaces = [`Found ${workspaces.length} angular`, workspaces.length === 1 ? 'workspace' : 'workspaces']
+            .join(' ')
+            .concat('\n')
 
-        console.log(chalk.bold.cyanBright(msg))
+        const workspaceTable = [[chalk.bold.whiteBright('Workspace Directory'), '|', chalk.bold.whiteBright('Default Project')]]
 
-        const info = [[chalk.bold.whiteBright('Workspace Directory'), '|', chalk.bold.whiteBright('Default Project')]]
+        workspaces.map(w => workspaceTable.push([w.getDirectory(), '|', chalk.cyan(w.defaultProject.getName())]))
 
-        workspaces.map(w => info.push([w.directory, '|', chalk.cyan(w.defaultProject.getName())]))
-
-        this.outputTable(info)
+        console.log(chalk.bold.cyanBright(msgFoundedWorkspaces))
+        console.log(chalk.white(this.outputTable(workspaceTable)))
     }
 
     private outputTable = (data: string[][], drawHorizontalLines?: boolean) =>
-        console.log(
-            chalk.white(
-                table(data, {
-                    border: getBorderCharacters('void'),
-                    columnDefault: { paddingLeft: 0, paddingRight: 2 },
-                    drawHorizontalLine: () => drawHorizontalLines,
-                })
-            )
-        )
+        table(data, {
+            border: getBorderCharacters('void'),
+            columnDefault: { paddingLeft: 0, paddingRight: 2 },
+            drawHorizontalLine: () => drawHorizontalLines,
+        })
 }

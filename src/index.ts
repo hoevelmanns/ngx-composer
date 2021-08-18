@@ -2,13 +2,12 @@
 import 'reflect-metadata'
 import chalk from 'chalk'
 import { bin, name, version } from '../package.json'
-import { VERSION as ngVersion } from '@angular/cli'
 
 const cliName = `${name.replace('-', ' ').toUpperCase()}`
 const cliBinName = Object.keys(bin).shift()
 const yargs = require('yargs')
 
-console.log(chalk.bold.whiteBright(`\n${cliName} ${version}\nAngular CLI ${ngVersion.full}\n`))
+console.log(chalk.bold.whiteBright(`\n${cliName} ${version}\n`))
 
 import('./commands').then(
     commands =>

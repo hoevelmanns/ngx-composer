@@ -9,3 +9,5 @@ export interface IProject {
     getSourceRoot(): string
     getRoot(): string
 }
+
+export type Projects = IProject[]

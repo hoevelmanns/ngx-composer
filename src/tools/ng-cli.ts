@@ -1,11 +1,12 @@
 import { autoInjectable, singleton } from 'tsyringe'
 import execa, { ExecaChildProcess } from 'execa'
-import { join } from 'path'
 
 @autoInjectable()
 @singleton()
 export class NgCliService {
-    private bin = join(__dirname, '../node_modules/.bin/ng')
+    private bin = 'ng'
+
+    checkPeerDeps() {}
 
     /**
      * Creates new Angular Workspace

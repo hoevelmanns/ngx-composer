@@ -1,37 +1,35 @@
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
-import { Apps, Shell } from 'targets'
-import { removeNgccLockFiles } from 'tools'
+import { Shell } from 'shell'
 import { Listr } from 'listr2'
 import { ContextService } from 'context'
 
 @injectable()
 class Serve implements Command {
-    constructor(
-        @inject(Shell) private shell: Shell,
-        @inject(Apps) private apps: Apps,
-        @inject(ContextService) private context: ContextService
-    ) {}
+    constructor(@inject(Shell) private shell: Shell, @inject(ContextService) private context: ContextService) {}
 
     async run(argv: Argv): Promise<void> {
         const ctx = this.context.buildContext(argv, builder)
 
         const tasks = new Listr(
-            {
-                title: 'Creating shell application...',
-                task: async (_, task) => {
-                    await this.shell.generate()
-                    task.title = 'Shell application created.'
+            [
+                {
+                    title: 'Creating shell application...',
+                    task: async (_, task) => {
+                        await this.shell.generate()
+                        task.title = 'Shell application created.'
+                    },
                 },
-            },
-            { ctx }
+            ],
+            { ctx, rendererOptions: { showErrorMessage: false } }
         )
 
         await tasks
             .run()
             .then(() => this.shell.serve(ctx))
             .catch(e => {
-                console.error('Error serving app', e.stderr ?? e.message)
+                console.error('Error serving app')
+                console.error(e.stderr ?? e.message)
             })
     }
 }

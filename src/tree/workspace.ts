@@ -1,32 +1,26 @@
 import { join } from 'path'
 import { readJSONSync } from 'fs-extra'
 import { Project } from './project'
+import { Package } from './package'
 
 export class Workspace {
-    private _defaultProject: Project
-    private angularConfig: { [key: string]: any }
+    private readonly _defaultProject: Project
+    private readonly package: Package
 
     constructor(private dir: string) {
-        this.init()
+        const { projects, defaultProject } = readJSONSync(join(dir, 'angular.json'))
+        this.package = Package.load(dir)
+        this._defaultProject = Project.load(projects[defaultProject], defaultProject, this.dir)
     }
 
-    init = (): Workspace => {
-        this.angularConfig = readJSONSync(join(this.dir, 'angular.json'))
+    static load = (...args: ConstructorParameters<typeof Workspace>) => new Workspace(...args)
 
-        this._defaultProject = new Project(
-            this.angularConfig.projects[this.angularConfig.defaultProject],
-            this.angularConfig.defaultProject,
-            this.dir
-        )
-
-        return this
-    }
+    getPackage = (): Package => this.package
+    getDirectory = () => this.dir
 
     get defaultProject(): Project {
         return this._defaultProject
     }
-
-    get directory(): string {
-        return this.dir
-    }
 }
+
+export type Workspaces = Workspace[]
