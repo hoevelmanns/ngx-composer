@@ -3,12 +3,13 @@ import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Shell } from 'shell'
 import { ContextService, Ctx } from 'context'
+import {CommandBuilder} from "yargs"
 
 @injectable()
 class Build implements Command {
     constructor(@inject(Shell) private shell: Shell, @inject(ContextService) private context: ContextService) {}
 
-    async run(argv: Argv): Promise<void> {
+    async run(argv: Argv, builder: CommandBuilder): Promise<void> {
         const tasks = new Listr(
             [
                 {
@@ -65,4 +66,4 @@ export const builder = {
         default: false,
     },
 }
-export const handler = (argv: Argv) => container.resolve(Build).run(argv)
+export const handler = (argv: Argv) => container.resolve(Build).run(argv, builder)

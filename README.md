@@ -7,6 +7,7 @@ Composes multiple Angular workspaces for building, serving and more without an o
 ## Motivation
 
 TODO
+- [ ] add "dist-serve" task with http-server
 - [ ] add peerDependency check!
 - [ ] add config.composer.json for configure the shell angular version and other things
 - [ ] add tsconfig merger packages & shell

@@ -1,0 +1,31 @@
+{
+    "name": "@ngx-composer/sw-plugin-excluder",
+    "version": "1.0.0",
+    "description": "a minimal plugin to create exclusion arguments based on disabled Shopware plugins",
+    "keywords": [
+        "ngx-composer",
+        "plugin",
+        "shopware4"
+    ],
+    "author": "hoevelmanns <mail@hoevelmanns.io>",
+    "homepage": "https://github.com/hoevelmanns/ngx-composer#readme",
+    "license": "ISC",
+    "main": "lib/sw-plugin-excluder.js",
+    "directories": {
+        "lib": "lib",
+        "test": "__tests__"
+    },
+    "files": [
+        "lib"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hoevelmanns/ngx-composer.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1"
+    },
+    "bugs": {
+        "url": "https://github.com/hoevelmanns/ngx-composer/issues"
+    }
+}
