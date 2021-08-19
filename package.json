@@ -1,5 +1,5 @@
 {
-    "name": "@ngx-composer/core",
+    "name": "@ngx-composer/cli",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
