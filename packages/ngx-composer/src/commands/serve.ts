@@ -15,10 +15,10 @@ class Serve implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: 'Creating shell application...',
+                    title: 'Preparing shell...',
                     task: async (_, task) => {
                         await this.shell.generate()
-                        task.title = 'Shell application created.'
+                        task.title = 'Shell is ready.'
                     },
                 },
             ],

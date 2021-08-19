@@ -10,13 +10,13 @@
     "author": "hoevelmanns <mail@hoevelmanns.io>",
     "homepage": "https://github.com/hoevelmanns/ngx-composer#readme",
     "license": "ISC",
-    "main": "lib/sw-plugin-excluder.js",
+    "main": "src/sw-plugin-excluder.js",
     "directories": {
-        "lib": "lib",
+        "lib": "src",
         "test": "__tests__"
     },
     "files": [
-        "lib"
+        "src"
     ],
     "repository": {
         "type": "git",

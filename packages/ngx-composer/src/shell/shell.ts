@@ -45,7 +45,7 @@ export class Shell {
                 args,
                 cwd: this.tempDir,
             })
-            .catch(e => new Error('Error generating shell:\n' + e.message))
+            .catch(e => new Error('Error preparing shell:\n' + e.message))
 
         await this.ng.setUnlimitedBudget(this.name, this.path)
         await this.updateMain()

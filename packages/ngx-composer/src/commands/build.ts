@@ -13,8 +13,8 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: 'Creating shell application...',
-                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell application created.')),
+                    title: 'Preparing shell...',
+                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell is ready.')),
                 },
             ],
             {
