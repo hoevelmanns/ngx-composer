@@ -58,7 +58,7 @@ export const builder = {
         alias: 'c',
     },
     'vendor-chunk': {
-        description: 'Generate a seperate bundle containing only vendor libraries.',
+        description: 'Generate a separate bundle containing only vendor libraries.',
         default: true,
     },
     'named-chunks': {
