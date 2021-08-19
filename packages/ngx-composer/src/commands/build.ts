@@ -3,7 +3,7 @@ import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Shell } from 'shell'
 import { ContextService, Ctx } from 'context'
-import {CommandBuilder} from "yargs"
+import { CommandBuilder } from 'yargs'
 
 @injectable()
 class Build implements Command {

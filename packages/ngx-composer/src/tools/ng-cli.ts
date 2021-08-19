@@ -6,8 +6,6 @@ import execa, { ExecaChildProcess } from 'execa'
 export class NgCliService {
     private bin = 'ng'
 
-    checkPeerDeps() {}
-
     /**
      * Creates new Angular Workspace
      */

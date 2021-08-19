@@ -24,6 +24,8 @@
         "build": "pnpm build --filter '@ngx-composer/*'",
         "watch": "pnpm build --filter '@ngx-composer/*'",
         "test": "echo \"Error: no test specified\" && exit 1",
+        "pretty": "prettier --check ./packages/*/src",
+        "pretty-fix": "prettier --check ./packages/*/src --write",
         "ngx": "ngx"
     },
     "repository": {

@@ -10,7 +10,7 @@ export class Workspace {
     constructor(private dir: string) {
         const { projects, defaultProject } = readJSONSync(join(dir, 'angular.json'))
         this.package = Package.load(dir)
-        this._defaultProject = Project.load(projects[defaultProject], defaultProject, this.dir)
+        this._defaultProject = Project.load(projects[defaultProject.toString()], defaultProject, this.dir)
     }
 
     static load = (...args: ConstructorParameters<typeof Workspace>) => new Workspace(...args)

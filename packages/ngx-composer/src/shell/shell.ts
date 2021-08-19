@@ -11,7 +11,7 @@ import { existsSync } from 'fs'
 @autoInjectable()
 export class Shell {
     protected name = 'shell'
-    protected tempDir = join(__dirname, '..', '.cache')
+    protected tempDir = join(process.env.PWD, 'node_modules', 'ngx-composer', '.cache') // todo replace 'ngx-composer' with var
     protected path = join(this.tempDir, this.name)
     protected templateDir = join(process.cwd(), 'templates')
     protected shellTsConfigPath = join(this.path, 'tsconfig.json')
@@ -38,7 +38,9 @@ export class Shell {
     async generate(): Promise<void> {
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
 
-        if (!existsSync(this.tempDir)) createDir(this.tempDir)
+        if (!existsSync(this.tempDir)) {
+            createDir(this.tempDir)
+        }
 
         await this.ng
             .new(this.name, {

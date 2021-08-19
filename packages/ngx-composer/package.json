@@ -10,11 +10,9 @@
         "url": "https://github.com/hoevelmanns/ngx-composer.git"
     },
     "scripts": {
-        "build": "ncc build src/index.ts -o ./dist -e fs-extra -e ng-packagr -e @angular/cli -e @angular/compiler-cli",
-        "watch": "ncc build src/index.ts -w -o ./dist -e fs-extra -e ng-packagr -e @angular/cli -e @angular/compiler-cli",
-        "prepublish": "npm run build",
-        "pretty": "prettier --check ./src ./packages",
-        "pretty-fix": "prettier --check ./src ./packages --write"
+        "build": "ncc build src/index.ts -o ./dist -e fs-extra -e ng-packagr",
+        "watch": "ncc build src/index.ts -w -o ./dist -e fs-extra -e ng-packagr",
+        "prepublish": "npm run build"
     },
     "author": "Marcelle Hövelmanns <mail@hoevelmanns.io>",
     "license": "ISC",
@@ -31,8 +29,6 @@
         "typescript": "^4.3.5"
     },
     "dependencies": {
-        "@ngx-composer/cli": "^1.0.0",
-        "@nrwl/cli": "^12.7.1",
         "chalk": "^4.1.2",
         "eta": "^1.12.3",
         "execa": "^5.1.1",

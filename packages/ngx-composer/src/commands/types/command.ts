@@ -1,4 +1,4 @@
-import {CommandBuilder} from "yargs"
+import { CommandBuilder } from 'yargs'
 
 export type Argv = { [key: string]: any }
 

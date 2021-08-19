@@ -3,7 +3,7 @@ import { container, inject, injectable } from 'tsyringe'
 import { Shell } from 'shell'
 import { Listr } from 'listr2'
 import { ContextService } from 'context'
-import {CommandBuilder} from "yargs"
+import { CommandBuilder } from 'yargs'
 
 @injectable()
 class Serve implements Command {
