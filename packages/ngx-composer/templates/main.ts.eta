@@ -1,11 +1,12 @@
 import { enableProdMode } from '@angular/core'
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
-<% it.appImports.forEach(function(appImport){ %>
-<%= appImport %>
+import {environment} from './environments/environment'
+import {AppModule} from './app/app.module'
+
+if (environment?.production) {
+    enableProdMode()
+}
+
+<% it.apps.forEach(function(app){ %>
+<%= app %>
 <% }) %>
 
-enableProdMode()
-
-<% it.bootstrapModules.forEach(function(module){ %>
-<%= module %>
-<% }) %>

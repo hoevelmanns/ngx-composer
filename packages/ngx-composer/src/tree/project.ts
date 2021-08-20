@@ -4,21 +4,18 @@ import { tsConfig, TsConfigContent } from 'utils'
 
 export class Project {
     private readonly name: string
-    private readonly modulePath: string
-    private readonly moduleDistPath: string
+    private readonly main: string
     private readonly tsConfig: TsConfigContent
 
     constructor(private projectConfig: ProjectConfig, public projectName: string, private workspaceDir: string) {
         this.name = projectName
-        this.modulePath = join(process.cwd(), workspaceDir, projectConfig.sourceRoot, 'app', 'app.module').toString()
-        this.moduleDistPath = join(process.cwd(), workspaceDir, projectConfig.architect.build.options.outputPath).toString()
+        this.main = join(process.cwd(), workspaceDir, this.projectConfig.architect.build.options.main).toString()
         this.tsConfig = tsConfig.find(join(workspaceDir, this.projectConfig.architect.build.options.tsConfig)).getContent()
     }
 
     static load = (...args: ConstructorParameters<typeof Project>) => new Project(...args)
 
-    getModulePath = (): string => this.modulePath
-    getModuleDistPath = (): string => this.moduleDistPath
+    getMain = (): string => this.main.replace('.ts', '')
     getName = (): string => this.name
     getTsConfig = (): TsConfigContent => this.tsConfig
     getWorkspaceDir = (): string => this.workspaceDir

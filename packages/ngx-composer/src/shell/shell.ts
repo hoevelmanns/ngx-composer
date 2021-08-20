@@ -82,22 +82,9 @@ export class Shell {
     }
 
     private async updateMain(): Promise<void> {
-        const appImports = <string[]>[]
-        const bootstrapModules = <string[]>[]
+        const apps = this.workspaces.map(({ defaultProject }) => `export * from '${defaultProject.getMain()}'\n`)
 
-        this.workspaces.map(({ defaultProject: { getName, getModulePath, getWorkspaceDir } }) => {
-            const replaceDashes = (str: string) => str.replace(/-/g, '/').split('/').join('_')
-            const modulePath = getModulePath()
-            const moduleName = replaceDashes(getWorkspaceDir()).concat(replaceDashes(getName()))
-
-            appImports.push(`import { AppModule as ${moduleName} } from '${modulePath}'\n`)
-            bootstrapModules.push(`platformBrowserDynamic().bootstrapModule(${moduleName}).catch(err => console.error(err))\n`)
-        })
-
-        const content = await this.eta.renderFile(this.mainTsTemplate, {
-            appImports,
-            bootstrapModules,
-        })
+        const content = await this.eta.renderFile(this.mainTsTemplate, { apps })
 
         await writeFile(this.mainTsPath, content)
     }
