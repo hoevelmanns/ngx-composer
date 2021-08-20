@@ -10,8 +10,8 @@
         "url": "https://github.com/hoevelmanns/ngx-composer.git"
     },
     "scripts": {
-        "build": "ncc build src/index.ts -o ./dist -e fs-extra -e ng-packagr",
-        "watch": "ncc build src/index.ts -w -o ./dist -e fs-extra -e ng-packagr",
+        "build": "ncc build src/index.ts -o ./dist -e fs-extra -e http-server",
+        "watch": "ncc build src/index.ts -w -o ./dist -e fs-extra -e http-server",
         "prepublish": "npm run build"
     },
     "author": "Marcelle Hövelmanns <mail@hoevelmanns.io>",
@@ -35,6 +35,7 @@
         "fast-glob": "^3.2.7",
         "fs-extra": "^10.0.0",
         "gzip-size": "^6.0.0",
+        "http-server": "^13.0.0",
         "is-glob": "^4.0.1",
         "listr2": "^3.11.0",
         "reflect-metadata": "^0.1.13",

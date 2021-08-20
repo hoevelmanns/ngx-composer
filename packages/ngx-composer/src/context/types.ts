@@ -8,6 +8,7 @@ interface Chunks {
 }
 
 export type Ctx = {
+    serve?: boolean
     chunks?: Chunks[]
     singleBundle?: boolean
     outputPath?: string

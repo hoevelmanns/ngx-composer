@@ -14,7 +14,7 @@ class Build implements Command {
             [
                 {
                     title: 'Preparing shell...',
-                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell is ready.')),
+                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell construction complete.')),
                 },
             ],
             {
@@ -59,7 +59,7 @@ export const builder = {
     },
     'vendor-chunk': {
         description: 'Generate a separate bundle containing only vendor libraries.',
-        default: true,
+        default: false,
     },
     'named-chunks': {
         description: 'Use file name for lazy loaded chunks,',

@@ -31,8 +31,8 @@ export class Shell {
         return this.ng.serve(ctx.ngOptions.toArray(), this.path, { stdio: 'inherit' })
     }
 
-    async build(ctx: Ctx) {
-        await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
+    async build(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
+        return this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
     }
 
     async generate(): Promise<void> {
@@ -57,6 +57,8 @@ export class Shell {
     private async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
+        delete shellTsConfig.compilerOptions.paths
+
         this.workspaces.map(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
             const filePath = getWorkspaceDir()
             const compilerOptionsPaths = getTsConfig().compilerOptions?.paths
@@ -67,7 +69,7 @@ export class Shell {
                     .map(([name, paths]) => ({ [name]: paths.map(p => join(process.cwd(), filePath, p).toString()) }))
                     .reduce((cur, acc) => ({ ...cur, ...acc }), {})
 
-            shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...(paths ?? {}) }
+            paths && (shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...paths })
         })
 
         // todo ngx-composer config?
@@ -84,8 +86,9 @@ export class Shell {
         const bootstrapModules = <string[]>[]
 
         this.workspaces.map(({ defaultProject: { getName, getModulePath, getWorkspaceDir } }) => {
+            const replaceDashes = (str: string) => str.replace(/-/g, '/').split('/').join('_')
             const modulePath = getModulePath()
-            const moduleName = getWorkspaceDir().replace(/-/g, '/').split('/').concat(getName()).join('_')
+            const moduleName = replaceDashes(getWorkspaceDir()).concat(replaceDashes(getName()))
 
             appImports.push(`import { AppModule as ${moduleName} } from '${modulePath}'\n`)
             bootstrapModules.push(`platformBrowserDynamic().bootstrapModule(${moduleName}).catch(err => console.error(err))\n`)
