@@ -63,7 +63,7 @@ export const builder = {
     },
     'named-chunks': {
         description: 'Use file name for lazy loaded chunks,',
-        default: false,
+        default: true,
     },
 }
 export const handler = (argv: Argv) => container.resolve(Build).run(argv, builder)

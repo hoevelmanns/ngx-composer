@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { readFileSync } from 'fs'
+import {existsSync, readFileSync } from 'fs'
 import stripJsonComments from 'strip-json-comments'
 
 export interface TsConfigContent {
@@ -21,8 +21,11 @@ class TsConfig {
 
     find(configPath: string): TsConfig {
         const findBaseTsConfig = (path: string): TsConfigContent => {
+            if (!existsSync(path)) {
+                return
+            }
             this.path = path
-            const config = JSON.parse(stripJsonComments(readFileSync(path, { encoding: 'utf-8' })))
+            const config = JSON.parse(stripJsonComments(readFileSync(path, { encoding: 'utf-8' }))) // todo validate tsconfig.json
             return config?.extends ? findBaseTsConfig(join(path, '..', config.extends)) : config
         }
 

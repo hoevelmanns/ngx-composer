@@ -57,11 +57,11 @@ export class Shell {
     private async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
-        delete shellTsConfig.compilerOptions.paths
+        delete shellTsConfig?.compilerOptions.paths
 
-        this.workspaces.map(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
+        this.workspaces.forEach(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
             const filePath = getWorkspaceDir()
-            const compilerOptionsPaths = getTsConfig().compilerOptions?.paths
+            const compilerOptionsPaths = getTsConfig()?.compilerOptions?.paths
 
             const paths =
                 compilerOptionsPaths &&

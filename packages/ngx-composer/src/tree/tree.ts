@@ -47,7 +47,7 @@ export class TreeService {
 
         const workspaceTable = [[chalk.bold.whiteBright('Workspace Directory'), '|', chalk.bold.whiteBright('Default Project')]]
 
-        workspaces.map(w => workspaceTable.push([w.getDirectory(), '|', chalk.cyan(w.defaultProject.getName())]))
+        workspaces.forEach(w => workspaceTable.push([w.getDirectory(), '|', chalk.cyan(w.defaultProject.getName())]))
 
         console.log(chalk.bold.cyanBright(msgFoundedWorkspaces))
         console.log(chalk.white(this.outputTable(workspaceTable)))
