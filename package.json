@@ -1,6 +1,8 @@
 {
     "private": true,
     "dependencies": {
+        "@typescript-eslint/eslint-plugin": "^4.29.3",
+        "@typescript-eslint/parser": "^4.29.3",
         "chalk": "^4.1.2",
         "eslint": "^7.32.0",
         "eta": "^1.12.3",
@@ -21,7 +23,11 @@
         "yargs": "^17.1.1"
     },
     "devDependencies": {
-        "@ngx-composer/tsconfig": "workspace:*"
+        "@ngx-composer/tsconfig": "workspace:*",
+        "@vercel/ncc": "^0.24.1",
+        "husky": "^7.0.1",
+        "lint-staged": "^11.1.2",
+        "prettier": "^2.3.2"
     },
     "scripts": {
         "build": "pnpm build --filter '@ngx-composer/*'",
@@ -29,7 +35,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "pretty": "prettier --check ./packages/*/src",
         "pretty-fix": "prettier --check ./packages/*/src --write",
-        "link:global": "sudo npm link ./packages/ngx-composer",
+        "link:global": "sudo npm link packages/cli",
         "ngx": "ngx"
     },
     "repository": {
@@ -41,5 +47,8 @@
     "bugs": {
         "url": "https://github.com/hoevelmanns/ngx-composer/issues"
     },
-    "homepage": "https://github.com/hoevelmanns/ngx-composer#readme"
+    "homepage": "https://github.com/hoevelmanns/ngx-composer#readme",
+    "lint-staged": {
+        "**/*": "prettier --write --ignore-unknown"
+    }
 }

@@ -68,6 +68,6 @@ export class NgCliService {
     }
 
     async add(pkgName: string, cwd: string): Promise<void> {
-        await execa(this.bin, ['add', pkgName, '--skip-confirmation'], { cwd }).catch(e => null)
+        await execa(this.bin, ['add', pkgName, '--skip-confirmation'], { cwd }).catch(null)
     }
 }

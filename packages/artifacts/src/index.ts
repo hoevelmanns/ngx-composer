@@ -1,1 +1,1 @@
-export const test = ''
+import {isCheerio} from "cheerio/lib/utils"

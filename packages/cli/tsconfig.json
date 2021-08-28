@@ -8,7 +8,6 @@
             "targets": ["src/targets"],
             "commands": ["src/commands"],
             "tree": ["src/tree"],
-            "tools": ["src/tools"],
             "shell": ["src/shell"]
         }
     },

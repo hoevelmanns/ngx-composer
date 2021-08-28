@@ -4,9 +4,9 @@ import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
 import { autoInjectable, inject } from 'tsyringe'
 import { join } from 'path'
 import { TreeService } from 'tree'
-import { NgCliService } from 'tools'
 import { Ctx } from 'context'
 import { existsSync } from 'fs'
+import {NgCliService} from "@ngx-composer/ng-tools"
 
 @autoInjectable()
 export class Shell {
