@@ -12,7 +12,7 @@
     "scripts": {
         "build": "ncc build src/index.ts -o ./dist -e fs-extra -e http-server",
         "watch": "ncc build src/index.ts -w -o ./dist -e fs-extra -e http-server",
-        "prepublish": "npm run build"
+        "prepare": "pnpm run build"
     },
     "author": "Marcelle Hövelmanns <mail@hoevelmanns.io>",
     "license": "ISC",

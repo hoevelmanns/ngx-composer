@@ -1,6 +1,7 @@
 {
   "extends": "@ngx-composer/tsconfig",
   "compilerOptions": {
+    "esModuleInterop": true,
     "outDir": "lib",
     "rootDir": "src",
   },

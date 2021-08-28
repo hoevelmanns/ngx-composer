@@ -4,6 +4,7 @@ import { container, inject, injectable } from 'tsyringe'
 import { Shell } from 'shell'
 import { ContextService, Ctx } from 'context'
 import { CommandBuilder } from 'yargs'
+import chalk from 'chalk'
 
 @injectable()
 class Build implements Command {
@@ -16,6 +17,17 @@ class Build implements Command {
                     title: 'Preparing shell...',
                     task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell construction complete.')),
                 },
+                {
+                    task: async (ctx, task) =>
+                        this.shell.build(ctx).then(() => (task.title = `Application built in ${chalk.cyan(ctx.outputPath)}`)),
+                },
+                {
+                    enabled: ctx => ctx.createLoaderFile,
+                    task: async (ctx, task) =>
+                        this.shell
+                            .createLoaderFile(ctx)
+                            .then(() => (task.title = `Loader file ${chalk.cyan(ctx.loaderFileName)} created.`)),
+                },
             ],
             {
                 exitOnError: true,
@@ -25,13 +37,10 @@ class Build implements Command {
             }
         )
 
-        await tasks
-            .run()
-            .then(async (ctx: Ctx) => this.shell.build(ctx))
-            .catch(e => {
-                console.error('Error running build:')
-                console.error(e.stderr ?? e.message)
-            })
+        await tasks.run().catch(e => {
+            console.error('Error running build:')
+            console.error(e.stderr ?? e.message)
+        })
     }
 }
 
@@ -62,8 +71,15 @@ export const builder = {
         default: false,
     },
     'named-chunks': {
-        description: 'Use file name for lazy loaded chunks,',
+        description: 'Use file name for lazy loaded chunks.',
         default: true,
+    },
+    'create-loader-file': {
+        description: 'Creates a template containing only the angular dist scripts',
+    },
+    'loader-file-name': {
+        description: 'The name of the loader file',
+        default: 'app-loader.tpl',
     },
 }
 export const handler = (argv: Argv) => container.resolve(Build).run(argv, builder)

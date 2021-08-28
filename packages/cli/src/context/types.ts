@@ -12,6 +12,8 @@ export type Ctx = {
     chunks?: Chunks[]
     singleBundle?: boolean
     outputPath: string
+    loaderFileName: string
+    createLoaderFile: boolean
     directory?: string
     ngOptions: TransformArgOptions
     concurrent?: boolean

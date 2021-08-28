@@ -14,13 +14,11 @@ export class Workspace {
         const defaultProjectConfig = projects[defaultProject.toString()]
 
         if (!defaultProjectConfig) {
-            console.error(
-                chalk.red(
-                    `Missing definition for default project ${chalk.white.bold(defaultProject)} in ${chalk.white.bold(
-                        angularJsonPath
-                    )}`
-                )
+            const message = chalk.red(
+                `Missing definition for default project ${chalk.white.bold(defaultProject)} in ${chalk.white.bold(angularJsonPath)}`
             )
+
+            console.error(message)
             process.exit()
         }
 

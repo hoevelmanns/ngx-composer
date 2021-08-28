@@ -6,7 +6,7 @@ import { join } from 'path'
 import { TreeService } from 'tree'
 import { Ctx } from 'context'
 import { existsSync } from 'fs'
-import {NgCliService} from "@ngx-composer/ng-tools"
+import { NgCliService } from '@ngx-composer/ng-tools'
 
 @autoInjectable()
 export class Shell {
@@ -28,14 +28,15 @@ export class Shell {
     }
 
     async serve(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
-        // todo it only works when it runs in vagrant ;-(
+        // todo it only works when the command runs in vagrant, because host is dev.<project>.x.x
         return this.ng.serve(ctx.ngOptions?.toArray(), this.path, { stdio: 'inherit' })
     }
 
     async build(ctx: Ctx): Promise<void> {
         await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
-        // todo build angular-artefacts.tpl
     }
+
+    createLoaderFile = async (ctx: Ctx) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName)
 
     async generate(): Promise<void> {
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']

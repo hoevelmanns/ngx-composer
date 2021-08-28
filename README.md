@@ -7,11 +7,11 @@ Composes multiple Angular workspaces for building, serving and more without an o
 ## Motivation
 
 TODO
-- wenn route nicht angular gefunden wird, wird auf / umgeleitet
-- ng serve muss in vagrant gestartet werden mit --host... lt. rdss-next cli/index.js
-- es muss ein template nach dem Build generiert werden, welches in der bspw. in der index.tpl inkludiert wird
+- ng-serve: set "--host" in vagrant using "printenv SERVERNAME"
+- wenn angular route nicht gefunden wird, wird auf / umgeleitet
+- ng serve muss in vagrant gestartet werden mit --host..., siehe. rdss-next cli/index.js
 - ngx build benötigt eine deploy-url:
-  - ngx build -e rdss-next -e RdssExample2 --deploy-url /dist/
+- ngx build -e rdss-next -e RdssExample2 --deploy-url /dist/
   
 - [ ] check ng installation
 - [ ] add "dist-serve" task with http-server

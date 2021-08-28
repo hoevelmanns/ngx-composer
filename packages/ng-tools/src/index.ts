@@ -1,5 +1,8 @@
 import { autoInjectable, singleton } from 'tsyringe'
-import execa, { ExecaChildProcess } from 'execa'
+import execa from 'execa'
+import * as cheerio from 'cheerio'
+import { readFile, writeFile } from 'fs-extra'
+import { join } from 'path'
 
 @autoInjectable()
 @singleton()
@@ -26,8 +29,8 @@ export class NgCliService {
      * @param {string} cwd
      * @param {execa.Options} options
      */
-    build(args: string[], cwd?: string, options?: execa.Options): ExecaChildProcess {
-        return execa(this.bin, ['build', ...args], {
+    async build(args: string[], cwd?: string, options?: execa.Options): Promise<void> {
+        await execa(this.bin, ['build', ...args], {
             cwd,
             ...options,
         })
@@ -40,6 +43,7 @@ export class NgCliService {
      * @param {string} cwd
      * @param {execa.Options} options
      */
+
     async serve(args: string[], cwd?: string, options?: execa.Options): Promise<void> {
         await execa(this.bin, ['serve', ...args], {
             cwd,
@@ -69,5 +73,22 @@ export class NgCliService {
 
     async add(pkgName: string, cwd: string): Promise<void> {
         await execa(this.bin, ['add', pkgName, '--skip-confirmation'], { cwd }).catch(null)
+    }
+
+    /**
+     * Creates a file containing only the dist scripts
+     *
+     * @param {string} outputPath - the output path
+     * @param {string} filename - the target filename
+     */
+    async createLoaderFile(outputPath: string, filename: string): Promise<void> {
+        const encoding = 'utf8'
+        const scripts = <string[]>[]
+        const indexHtml = await readFile(join(outputPath, 'index.html'), { encoding })
+        const $ = cheerio.load(indexHtml)
+
+        $('script, link[rel="stylesheet"]').each((index, elem) => scripts.push($.html(elem)))
+
+        await writeFile(join(outputPath, filename), scripts.join('\n'), { encoding })
     }
 }

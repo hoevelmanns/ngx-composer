@@ -6,13 +6,15 @@ import { removeProps, TransformArgOptions, transformArgOptions } from 'utils'
 @autoInjectable()
 export class ContextService {
     buildContext = (argv: Argv, builder = <Argv>{}, ...excludeArgs): Ctx => {
-        const { directory, singleBundle, concurrent, outputPath } = argv
+        const { directory, singleBundle, concurrent, outputPath, loaderFileName, createLoaderFile } = argv
         const ctx: Ctx = {
             chunks: [],
             directory,
-            singleBundle: singleBundle !== 'false',
-            concurrent: concurrent !== 'false',
+            singleBundle,
+            concurrent,
             outputPath: outputPath ? join(process.cwd(), outputPath) : join(process.cwd(), 'dist'),
+            loaderFileName,
+            createLoaderFile,
             ngOptions: <TransformArgOptions>{},
         }
 

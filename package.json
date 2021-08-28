@@ -27,15 +27,17 @@
         "@vercel/ncc": "^0.24.1",
         "husky": "^7.0.1",
         "lint-staged": "^11.1.2",
-        "prettier": "^2.3.2"
+        "prettier": "^2.3.2",
+        "rimraf": "^3.0.2"
     },
     "scripts": {
-        "build": "pnpm build --filter '@ngx-composer/*'",
-        "watch": "pnpm watch --filter '@ngx-composer/*'",
+        "build": "pnpm run compile:all; pnpm build --filter '@ngx-composer/*'",
+        "watch": "pnpm run watch --filter '@ngx-composer/*'",
         "test": "echo \"Error: no test specified\" && exit 1",
         "pretty": "prettier --check ./packages/*/src",
         "pretty-fix": "prettier --check ./packages/*/src --write",
         "link:global": "sudo npm link packages/cli",
+        "compile:all": "pnpm -r compile",
         "ngx": "ngx"
     },
     "repository": {
