@@ -1,12 +1,6 @@
 {
+    "extends": "@ngx-composer/tsconfig",
     "compilerOptions": {
-        "experimentalDecorators": true,
-        "target": "es2017",
-        "module": "esnext",
-        "moduleResolution": "node",
-        "lib": ["es2019"],
-        "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true,
         "baseUrl": ".",
         "paths": {
             "utils": ["src/utils"],
@@ -17,5 +11,7 @@
             "tools": ["src/tools"],
             "shell": ["src/shell"]
         }
-    }
+    },
+    "include": ["src/**/*.ts"],
+    "files": ["./package.json"]
 }

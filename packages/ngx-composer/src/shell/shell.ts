@@ -11,7 +11,7 @@ import { existsSync } from 'fs'
 @autoInjectable()
 export class Shell {
     protected name = 'shell'
-    protected tempDir = join(process.env.PWD, 'node_modules', 'ngx-composer', '.cache') // todo replace 'ngx-composer' with var
+    protected tempDir = join(process.env.PWD ?? '', 'node_modules', 'ngx-composer', '.cache') // todo replace 'ngx-composer' with var
     protected path = join(this.tempDir, this.name)
     protected templateDir = join(process.cwd(), 'templates')
     protected shellTsConfigPath = join(this.path, 'tsconfig.json')
@@ -28,11 +28,13 @@ export class Shell {
     }
 
     async serve(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
-        return this.ng.serve(ctx.ngOptions.toArray(), this.path, { stdio: 'inherit' })
+        // todo it only works when it runs in vagrant ;-(
+        return this.ng.serve(ctx.ngOptions?.toArray(), this.path, { stdio: 'inherit' })
     }
 
-    async build(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
-        return this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
+    async build(ctx: Ctx): Promise<void> {
+        await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
+        // todo build angular-artefacts.tpl
     }
 
     async generate(): Promise<void> {

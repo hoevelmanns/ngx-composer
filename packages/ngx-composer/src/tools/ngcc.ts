@@ -1,4 +1,4 @@
-import * as fg from 'fast-glob'
+import fg from 'fast-glob'
 import { join } from 'path'
 import { rm } from 'fs-extra'
 import execa from 'execa'

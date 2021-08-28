@@ -5,9 +5,9 @@ export interface IProjectArchitect {
             project?: string
             outputPath?: string
             index?: string
-            main?: string
+            main: string
             polyfills?: string
-            tsConfig?: string
+            tsConfig: string
             assets?: string[]
             styles?: string[]
             scripts?: string[]

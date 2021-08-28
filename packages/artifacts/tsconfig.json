@@ -1,0 +1,11 @@
+{
+  "extends": "@ngx-composer/tsconfig",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../typings/**/*.d.ts"
+  ]
+}

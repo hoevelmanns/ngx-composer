@@ -53,7 +53,7 @@ export class TreeService {
         console.log(chalk.white(this.outputTable(workspaceTable)))
     }
 
-    private outputTable = (data: string[][], drawHorizontalLines?: boolean) =>
+    private outputTable = (data: string[][], drawHorizontalLines = false) =>
         table(data, {
             border: getBorderCharacters('void'),
             columnDefault: { paddingLeft: 0, paddingRight: 2 },

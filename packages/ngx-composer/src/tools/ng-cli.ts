@@ -13,9 +13,9 @@ export class NgCliService {
         name: string,
         options?: { args: string[]; cwd?: string; options?: execa.Options; packageManager?: 'npm' | 'pnpm' | 'yarn' }
     ): Promise<void> {
-        await execa(this.bin, ['new', name, ...options.args], {
-            cwd: options.cwd ?? process.cwd(),
-            ...options.options,
+        await execa(this.bin, ['new', name, ...(options?.args ?? [])], {
+            cwd: options?.cwd ?? process.cwd(),
+            ...options?.options,
         })
     }
 

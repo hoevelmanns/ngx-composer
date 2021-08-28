@@ -1,0 +1,17 @@
+{
+  "name": "@ngx-composer/tsconfig",
+  "description": "ngx composer's TypeScript configuration",
+  "version": "1.0.0",
+  "author": {
+    "name": "Marcelle Hövelmanns",
+    "email": "mail@hoevelmanns.io",
+    "url": "https://www.hoevelmanns.io/"
+  },
+  "license": "MIT",
+  "main": "tsconfig.json",
+  "homepage": "https://ngx-composer.io",
+  "repository": "https://github.com/hoevelmanns/ngx-composer/blob/master/utils/tsconfig",
+  "bugs": {
+    "url": "https://github.com/hoevelmanns/ngx-composer/issues"
+  }
+}

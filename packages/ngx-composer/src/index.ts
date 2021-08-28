@@ -17,7 +17,7 @@ import('./commands').then(
         Object.entries(commands.default).map(command => yargs.command(command.pop())) &&
         yargs
             .commands({ command: '*', handler: () => yargs.showHelp() })
-            .scriptName(cliBinName)
+            .scriptName(cliBinName ?? 'NGX Composer')
             .usage(`$0 <cmd> [args]`)
             .version(version)
             .help().argv

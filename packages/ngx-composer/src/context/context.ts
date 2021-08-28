@@ -1,7 +1,7 @@
 import { autoInjectable } from 'tsyringe'
 import { join } from 'path'
 import { Argv, Ctx } from './types'
-import { removeProps, transformArgOptions } from 'utils'
+import { removeProps, TransformArgOptions, transformArgOptions } from 'utils'
 
 @autoInjectable()
 export class ContextService {
@@ -13,6 +13,7 @@ export class ContextService {
             singleBundle: singleBundle !== 'false',
             concurrent: concurrent !== 'false',
             outputPath: outputPath ? join(process.cwd(), outputPath) : join(process.cwd(), 'dist'),
+            ngOptions: <TransformArgOptions>{},
         }
 
         const alias = Object.entries(builder).map(([_, val]) => val['alias'])

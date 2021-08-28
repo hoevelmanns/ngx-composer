@@ -11,9 +11,9 @@ export type Ctx = {
     serve?: boolean
     chunks?: Chunks[]
     singleBundle?: boolean
-    outputPath?: string
+    outputPath: string
     directory?: string
-    ngOptions?: TransformArgOptions
+    ngOptions: TransformArgOptions
     concurrent?: boolean
     vendorChunk?: boolean
     namedChunks?: boolean

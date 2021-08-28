@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "strict": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "experimentalDecorators": true,
+    "target": "es2017",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "es2019"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
+  },
+  "atom": {
+    "rewriteTsconfig": true
+  }
+}
