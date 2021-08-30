@@ -12,7 +12,7 @@ export class ContextService {
             directory,
             singleBundle,
             concurrent,
-            outputPath: outputPath ? join(process.cwd(), outputPath) : join(process.cwd(), 'dist'),
+            outputPath: outputPath ? outputPath : join(process.cwd(), 'dist'),
             loaderFileName,
             createLoaderFile,
             ngOptions: <TransformArgOptions>{},
