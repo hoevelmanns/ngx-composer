@@ -2,10 +2,11 @@
     "name": "@ngx-composer/cli",
     "version": "1.0.0",
     "description": "Composes multiple Angular workspaces for building, serving and more without an overhead of configuration.",
-    "main": "index.js",
+    "main": "dist/index.js",
     "bin": {
         "ngx": "./dist/index.js"
     },
+    "private": false,
     "repository": {
         "url": "https://github.com/hoevelmanns/ngx-composer.git"
     },

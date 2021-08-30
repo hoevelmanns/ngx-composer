@@ -36,8 +36,6 @@ export class Shell {
         await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
     }
 
-    createLoaderFile = async (ctx: Ctx) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName)
-
     async generate(): Promise<void> {
         const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
 
@@ -56,6 +54,8 @@ export class Shell {
         await this.updateMain()
         await this.updateTsConfig()
     }
+
+    createLoaderFile = async (ctx: Ctx) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName)
 
     private async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()

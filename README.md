@@ -7,6 +7,7 @@ Composes multiple Angular workspaces for building, serving and more without an o
 ## Motivation
 
 TODO
+- ngx build --create-loader-file --deploy-url /themes/Frontend/Weinfreunde/dist/ --output-path ./themes/Frontend/Weinfreunde/dist
 - ng-serve: set "--host" in vagrant using "printenv SERVERNAME"
 - wenn angular route nicht gefunden wird, wird auf / umgeleitet
 - ng serve muss in vagrant gestartet werden mit --host..., siehe. rdss-next cli/index.js
