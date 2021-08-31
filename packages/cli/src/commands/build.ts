@@ -40,6 +40,7 @@ class Build implements Command {
         await tasks.run().catch(e => {
             console.error('Error running build:')
             console.error(e.stderr ?? e.message)
+            process.exit(1)
         })
     }
 }

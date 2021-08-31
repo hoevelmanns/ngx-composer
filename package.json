@@ -1,6 +1,7 @@
 {
     "private": true,
     "dependencies": {
+        "@ngx-composer/cli": "^1.0.2",
         "@typescript-eslint/eslint-plugin": "^4.29.3",
         "@typescript-eslint/parser": "^4.29.3",
         "chalk": "^4.1.2",

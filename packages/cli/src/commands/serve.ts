@@ -31,6 +31,7 @@ class Serve implements Command {
             .catch(e => {
                 console.error('Error serving app')
                 console.error(e.stderr ?? e.message)
+                process.exit(1)
             })
     }
 }
