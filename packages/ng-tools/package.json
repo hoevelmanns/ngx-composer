@@ -16,7 +16,7 @@
     "test": "pnpm run compile",
     "dev": "tsc --watch",
     "prepare": "pnpm run compile",
-    "compile": "rimraf lib tsconfig.tsbuildinfo && tsc --build && pnpm run lint -- --fix"
+    "compile": "tsc --build && pnpm run lint -- --fix"
   },
   "repository": "https://github.com/hoevelmanns/ngx-composer/blob/master/packages/ng-tools",
   "keywords": [
@@ -34,6 +34,7 @@
     "tsyringe": "^4.6.0"
   },
   "devDependencies": {
+    "@ngx-composer/tsconfig": "workspace:*",
     "typescript": "^4.4.2"
   }
 }
