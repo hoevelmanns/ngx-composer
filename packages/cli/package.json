@@ -1,6 +1,6 @@
 {
     "name": "@ngx-composer/cli",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Composes multiple Angular workspaces for building, serving and more without an overhead of configuration.",
     "main": "dist/index.js",
     "bin": {

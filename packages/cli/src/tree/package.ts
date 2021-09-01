@@ -1,5 +1,7 @@
 import { join } from 'path'
 import { readJSONSync } from 'fs-extra'
+import {existsSync} from "fs"
+import chalk from "chalk"
 
 interface PkgJson {
     name: string
@@ -19,7 +21,14 @@ export interface IPackage {
 export class Package {
     constructor(private pkgJson: PkgJson) {}
 
-    static load = (dir: string) => new Package(readJSONSync(join(dir, 'package.json')))
+    static load = (dir: string): Package => {
+        const pkgJsonPath = join(dir, 'package.json')
+        if (!existsSync(pkgJsonPath)) {
+            console.error(chalk.red(`No package.json found at ${dir}`));
+            process.exit(1)
+        }
+        return new Package(readJSONSync(join(dir, 'package.json')))
+    }
 
     getPeerDependencies = () => this.pkgJson.peerDependencies ?? {}
     getDependencies = () => this.pkgJson.dependencies ?? {}
