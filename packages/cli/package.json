@@ -2,32 +2,31 @@
     "name": "@ngx-composer/cli",
     "version": "1.0.4",
     "description": "Composes multiple Angular workspaces for building, serving and more without an overhead of configuration.",
-    "main": "dist/index.js",
+    "main": "build/index.js",
     "bin": {
-        "ngx": "./dist/index.js"
+        "ngx": "./build/index.js"
     },
     "private": false,
     "repository": {
         "url": "https://github.com/hoevelmanns/ngx-composer.git"
     },
     "scripts": {
-        "build": "ncc build src/index.ts -o ./dist -e fs-extra",
-        "watch": "ncc build src/index.ts -w -o ./dist -e fs-extra",
+        "build": "ncc build src/index.ts -o build -e fs-extra",
+        "watch": "ncc build src/index.ts -w -o build -e fs-extra",
         "prepare": "pnpm run build"
     },
     "author": "Marcelle Hövelmanns <mail@hoevelmanns.io>",
     "license": "ISC",
     "devDependencies": {
-        "@ngx-composer/tsconfig": "workspace:*",
         "@types/fs-extra": "^9.0.12",
         "@types/is-glob": "^4.0.2",
         "@types/node": "^16.4.7",
         "@types/yargs": "^17.0.2",
-        "typescript": "^4.3.5",
-        "@vercel/ncc": "^0.24.1"
+        "@vercel/ncc": "^0.24.1",
+        "typescript": "^4.3.5"
     },
     "dependencies": {
-        "@ngx-composer/ng-tools": "workspace:*",
+        "@ngx-composer/ng-tools": "1.0.1",
         "chalk": "^4.1.2",
         "eta": "^1.12.3",
         "execa": "^5.1.1",

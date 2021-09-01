@@ -4,12 +4,14 @@ importers:
 
   .:
     specifiers:
+      '@ngx-composer/tsconfig': workspace:*
       eslint: ^7.32.0
       husky: ^7.0.1
       lint-staged: ^11.1.2
       prettier: ^2.3.2
       rimraf: ^3.0.2
     devDependencies:
+      '@ngx-composer/tsconfig': link:utils/tsconfig
       eslint: 7.32.0
       husky: 7.0.2
       lint-staged: 11.1.2
@@ -18,8 +20,7 @@ importers:
 
   packages/cli:
     specifiers:
-      '@ngx-composer/ng-tools': workspace:*
-      '@ngx-composer/tsconfig': workspace:*
+      '@ngx-composer/ng-tools': 1.0.1
       '@types/fs-extra': ^9.0.12
       '@types/is-glob': ^4.0.2
       '@types/node': ^16.4.7
@@ -53,7 +54,6 @@ importers:
       tsyringe: 4.6.0
       yargs: 17.1.1
     devDependencies:
-      '@ngx-composer/tsconfig': link:../../utils/tsconfig
       '@types/fs-extra': 9.0.12
       '@types/is-glob': 4.0.2
       '@types/node': 16.7.10

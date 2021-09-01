@@ -2,6 +2,7 @@
 node_modules
 dist
 lib
+build/
 .pnpm-debug.log
 .idea
 package-lock.json
