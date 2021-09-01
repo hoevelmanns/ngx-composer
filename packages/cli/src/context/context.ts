@@ -1,7 +1,7 @@
 import { autoInjectable } from 'tsyringe'
-import { join } from 'path'
 import { Argv, Ctx } from './types'
 import { removeProps, TransformArgOptions, transformArgOptions } from 'utils'
+import {makeAbsolute} from "fast-glob/out/utils/path"
 
 @autoInjectable()
 export class ContextService {
@@ -12,7 +12,7 @@ export class ContextService {
             directory,
             singleBundle,
             concurrent,
-            outputPath: outputPath ? outputPath : join(process.cwd(), 'dist'),
+            outputPath: makeAbsolute(process.cwd(), outputPath ?? 'dist'),
             loaderFileName,
             createLoaderFile,
             ngOptions: <TransformArgOptions>{},

@@ -4,16 +4,22 @@ import { Shell } from 'shell'
 import { Listr } from 'listr2'
 import { ContextService } from 'context'
 import { CommandBuilder } from 'yargs'
+import chalk from "chalk"
 
 @injectable()
 class Serve implements Command {
     constructor(@inject(Shell) private shell: Shell, @inject(ContextService) private context: ContextService) {}
 
     async run(argv: Argv, builder: CommandBuilder): Promise<void> {
-        const ctx = this.context.buildContext(argv, builder)
-
         const tasks = new Listr(
             [
+                {
+                    enabled: ctx => ctx.createLoaderFile,
+                    task: async (ctx, task) =>
+                        this.shell
+                            .createLoaderFile(ctx, true)
+                            .then(() => (task.title = `Loader file ${chalk.cyan(ctx.loaderFileName)} created.`)),
+                },
                 {
                     title: 'Preparing shell...',
                     task: async (_, task) => {
@@ -22,12 +28,15 @@ class Serve implements Command {
                     },
                 },
             ],
-            { ctx, rendererOptions: { showErrorMessage: false } }
+            {
+                ctx: this.context.buildContext(argv, builder),
+                rendererOptions: { showErrorMessage: false }
+            }
         )
 
         await tasks
             .run()
-            .then(() => this.shell.serve(ctx))
+            .then(ctx => this.shell.serve(ctx))
             .catch(e => {
                 console.error('Error serving app')
                 console.error(e.stderr ?? e.message)
@@ -51,6 +60,13 @@ export const builder = {
     exclude: {
         description: 'Exclude specified path or glob. Can be used many times.',
         alias: 'e',
+    },
+    'create-loader-file': {
+        description: 'Creates a template containing only the angular dist scripts',
+    },
+    'loader-file-name': {
+        description: 'The name of the loader file',
+        default: 'app-loader.tpl',
     },
 }
 export const handler = (argv: Argv) => container.resolve(Serve).run(argv, builder)

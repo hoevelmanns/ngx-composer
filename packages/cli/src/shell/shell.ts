@@ -55,7 +55,7 @@ export class Shell {
         await this.updateTsConfig()
     }
 
-    createLoaderFile = async (ctx: Ctx) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName)
+    createLoaderFile = async (ctx: Ctx, serve?: boolean) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName, serve)
 
     private async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()

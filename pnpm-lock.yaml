@@ -20,7 +20,7 @@ importers:
 
   packages/cli:
     specifiers:
-      '@ngx-composer/ng-tools': 1.0.1
+      '@ngx-composer/ng-tools': workspace:1.0.1
       '@types/fs-extra': ^9.0.12
       '@types/is-glob': ^4.0.2
       '@types/node': ^16.4.7
