@@ -1,7 +1,7 @@
 import { autoInjectable } from 'tsyringe'
 import { Argv, Ctx } from './types'
 import { removeProps, TransformArgOptions, transformArgOptions } from 'utils'
-import {makeAbsolute} from "fast-glob/out/utils/path"
+import { makeAbsolute } from 'fast-glob/out/utils/path'
 
 @autoInjectable()
 export class ContextService {

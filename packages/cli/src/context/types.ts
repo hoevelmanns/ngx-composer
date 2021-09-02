@@ -16,6 +16,7 @@ export type Ctx = {
     createLoaderFile: boolean
     directory?: string
     ngOptions: TransformArgOptions
+    packageManager?: string
     concurrent?: boolean
     vendorChunk?: boolean
     namedChunks?: boolean

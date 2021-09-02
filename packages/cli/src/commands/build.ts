@@ -15,7 +15,7 @@ class Build implements Command {
             [
                 {
                     title: 'Preparing shell...',
-                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell construction complete.')),
+                    task: async (ctx, task) => this.shell.generate(ctx).then(() => (task.title = 'Shell construction complete.')),
                 },
                 {
                     task: async (ctx, task) =>

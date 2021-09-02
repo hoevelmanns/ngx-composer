@@ -1,8 +1,8 @@
-import {autoInjectable, singleton} from 'tsyringe'
+import { autoInjectable, singleton } from 'tsyringe'
 import execa from 'execa'
 import * as cheerio from 'cheerio'
-import {readFile, outputFile} from 'fs-extra'
-import {join} from 'path'
+import { readFile, outputFile } from 'fs-extra'
+import { join } from 'path'
 
 @autoInjectable()
 @singleton()
@@ -72,7 +72,7 @@ export class NgCliService {
     }
 
     async add(pkgName: string, cwd: string): Promise<void> {
-        await execa(this.bin, ['add', pkgName, '--skip-confirmation'], {cwd}).catch(null)
+        await execa(this.bin, ['add', pkgName, '--skip-confirmation'], { cwd }).catch(null)
     }
 
     /**
@@ -86,14 +86,14 @@ export class NgCliService {
         const encoding = 'utf8'
         const scripts = <string[]>[]
 
-        const indexHtml = serve ?
-            `<link rel="stylesheet" href="styles.css"><script src="runtime.js" defer></script><script src="polyfills.js" defer></script>
+        const indexHtml = serve
+            ? `<link rel="stylesheet" href="styles.css"><script src="runtime.js" defer></script><script src="polyfills.js" defer></script>
              <script src="vendor.js" defer></script><script src="main.js" defer></script></body>`
-            : await readFile(join(outputPath, 'index.html'), {encoding})
+            : await readFile(join(outputPath, 'index.html'), { encoding })
 
         const $ = cheerio.load(indexHtml)
         $('script, link[rel="stylesheet"]').each((index, elem) => scripts.push($.html(elem)))
 
-        await outputFile(join(outputPath, filename), scripts.join('\n'), {encoding})
+        await outputFile(join(outputPath, filename), scripts.join('\n'), { encoding })
     }
 }

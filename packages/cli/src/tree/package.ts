@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { readJSONSync } from 'fs-extra'
-import {existsSync} from "fs"
-import chalk from "chalk"
+import { existsSync } from 'fs'
+import chalk from 'chalk'
 
 interface PkgJson {
     name: string
@@ -24,7 +24,7 @@ export class Package {
     static load = (dir: string): Package => {
         const pkgJsonPath = join(dir, 'package.json')
         if (!existsSync(pkgJsonPath)) {
-            console.error(chalk.red(`No package.json found at ${dir}`));
+            console.error(chalk.red(`No package.json found at ${dir}`))
             process.exit(1)
         }
         return new Package(readJSONSync(join(dir, 'package.json')))

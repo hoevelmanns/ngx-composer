@@ -4,7 +4,7 @@ import { Shell } from 'shell'
 import { Listr } from 'listr2'
 import { ContextService } from 'context'
 import { CommandBuilder } from 'yargs'
-import chalk from "chalk"
+import chalk from 'chalk'
 
 @injectable()
 class Serve implements Command {
@@ -30,7 +30,7 @@ class Serve implements Command {
             ],
             {
                 ctx: this.context.buildContext(argv, builder),
-                rendererOptions: { showErrorMessage: false }
+                rendererOptions: { showErrorMessage: false },
             }
         )
 

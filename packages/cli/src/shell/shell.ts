@@ -7,6 +7,7 @@ import { TreeService } from 'tree'
 import { Ctx } from 'context'
 import { existsSync } from 'fs'
 import { NgCliService } from '@ngx-composer/ng-tools'
+import { lookpath } from 'lookpath'
 
 @autoInjectable()
 export class Shell {
@@ -36,8 +37,9 @@ export class Shell {
         await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
     }
 
-    async generate(): Promise<void> {
-        const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests']
+    async generate(ctx?: Ctx): Promise<void> {
+        const pkgManager = ((await lookpath('pnpm')) ?? (await lookpath('yarn')))?.split('/').pop() ?? 'npm'
+        const args = ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--package-manager', ctx?.packageManager ?? pkgManager]
 
         if (!existsSync(this.tempDir)) {
             createDir(this.tempDir)

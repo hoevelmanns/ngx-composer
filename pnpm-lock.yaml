@@ -20,7 +20,7 @@ importers:
 
   packages/cli:
     specifiers:
-      '@ngx-composer/ng-tools': workspace:1.0.1
+      '@ngx-composer/ng-tools': 1.0.2
       '@types/fs-extra': ^9.0.12
       '@types/is-glob': ^4.0.2
       '@types/node': ^16.4.7
@@ -33,6 +33,7 @@ importers:
       fs-extra: ^10.0.0
       is-glob: ^4.0.1
       listr2: ^3.11.0
+      lookpath: ^1.2.2
       reflect-metadata: ^0.1.13
       strip-json-comments: ^3.1.1
       table: ^6.7.1
@@ -48,6 +49,7 @@ importers:
       fs-extra: 10.0.0
       is-glob: 4.0.1
       listr2: 3.11.1
+      lookpath: 1.2.2
       reflect-metadata: 0.1.13
       strip-json-comments: 3.1.1
       table: 6.7.1
@@ -1139,6 +1141,12 @@ packages:
       cli-cursor: 3.1.0
       slice-ansi: 4.0.0
       wrap-ansi: 6.2.0
+
+  /lookpath/1.2.2:
+    resolution: {integrity: sha512-k2Gmn8iV6qdME3ztZC2spubmQISimFOPLuQKiPaLcVdRz0IpdxrNClVepMlyTJlhodm/zG/VfbkWERm3kUIh+Q==}
+    engines: {npm: '>=6.13.4'}
+    hasBin: true
+    dev: false
 
   /lru-cache/6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
