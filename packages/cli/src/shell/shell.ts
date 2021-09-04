@@ -11,21 +11,42 @@ import { mergeJson } from 'merge-packages'
 
 @autoInjectable()
 export class Shell {
-    protected name = 'shell'
-    protected cacheDir = join(process.env.PWD ?? '', 'node_modules', 'ngx-composer', '.cache') // todo replace 'ngx-composer' with var
-    protected path = join(this.cacheDir, this.name)
-    protected templateDir = join(process.cwd(), 'templates')
-    protected shellTsConfigPath = join(this.path, 'tsconfig.json')
-    protected mainTsPath = join(this.cacheDir, this.name, 'src', 'main.ts')
-    protected mainTsTemplate = 'main.ts.eta'
-    private eta = require('eta')
-    private workspaces = this.treeService.getWorkspaces()
+    protected readonly name = 'shell'
+    protected readonly cacheDir = join(process.env.PWD ?? '', 'node_modules', 'ngx-composer', '.cache') // todo replace 'ngx-composer' with var
+    protected readonly path = join(this.cacheDir, this.name)
+    protected readonly templateDir = join(process.cwd(), 'templates')
+    protected readonly shellTsConfigPath = join(this.path, 'tsconfig.json')
+    protected readonly mainTsPath = join(this.cacheDir, this.name, 'src', 'main.ts')
+    protected readonly mainTsTemplate = 'main.ts.eta'
+    private readonly eta = require('eta')
+    private readonly workspaces = this.treeService.getWorkspaces()
 
     constructor(@inject(TreeService) private treeService: TreeService, @inject(NgCliService) private ng: NgCliService) {
         this.eta.configure({
             autoEscape: false,
             views: this.templateDir,
         })
+    }
+
+    directoryExists = () => existsSync(this.cacheDir)
+
+    createLoaderFile = async (ctx: Ctx, serve?: boolean) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName, serve)
+
+    async generate(): Promise<void> {
+        !this.directoryExists() && createDir(this.cacheDir)
+
+        await this.ng
+            .new(this.name, {
+                args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
+                cwd: this.cacheDir,
+            })
+            .catch(e => new Error('Error preparing shell:\n' + e.message))
+
+        await this.updateMain()
+        await this.updateTsConfig()
+        await this.updatePackageJson()
+        await this.ng.setUnlimitedBudget(this.name, this.path)
+        await this.ng.install(this.path)
     }
 
     async serve(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
@@ -36,7 +57,7 @@ export class Shell {
         await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
     }
 
-    async updatePackageJson(): Promise<void> {
+    protected async updatePackageJson(): Promise<void> {
         const shellPkgJson = await readJson(join(this.path, 'package.json'))
         const pkgContents = await Promise.all(this.workspaces.map(async ws => await readJson(join(ws.getDirectory(), 'package.json'))))
 
@@ -53,28 +74,7 @@ export class Shell {
         await writeJson(join(this.path, 'package.json'), merged, { spaces: '  ' })
     }
 
-    shellExist = () => existsSync(this.cacheDir)
-
-    async generate(): Promise<void> {
-        !this.shellExist() && createDir(this.cacheDir)
-
-        await this.ng
-            .new(this.name, {
-                args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
-                cwd: this.cacheDir,
-            })
-            .catch(e => new Error('Error preparing shell:\n' + e.message))
-
-        await this.updateMain()
-        await this.updateTsConfig()
-        await this.updatePackageJson()
-        await this.ng.setUnlimitedBudget(this.name, this.path)
-        await this.ng.install(this.path)
-    }
-
-    createLoaderFile = async (ctx: Ctx, serve?: boolean) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName, serve)
-
-    private async updateTsConfig(): Promise<void> {
+    protected async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
         this.workspaces.forEach(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
@@ -102,7 +102,7 @@ export class Shell {
         await writeJson(this.shellTsConfigPath, shellTsConfig, { spaces: '  ' })
     }
 
-    private async updateMain(): Promise<void> {
+    protected async updateMain(): Promise<void> {
         const apps = this.workspaces.map(({ defaultProject }) => `export * from '${defaultProject.getMain()}'\n`)
         const content = await this.eta.renderFile(this.mainTsTemplate, { apps })
 

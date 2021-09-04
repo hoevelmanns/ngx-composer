@@ -14,7 +14,7 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: this.shell.shellExist() ? 'Shell exist. Updating...' : 'Creating shell...',
+                    title: this.shell.directoryExists() ? 'Shell exists. Updating...' : 'Creating shell...',
                     options: { showTimer: true },
                     task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell preparation complete.')),
                 },

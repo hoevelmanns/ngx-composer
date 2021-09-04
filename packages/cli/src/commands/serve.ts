@@ -21,7 +21,7 @@ class Serve implements Command {
                             .then(() => (task.title = `Loader file ${chalk.cyan(ctx.loaderFileName)} created.`)),
                 },
                 {
-                    title: this.shell.shellExist() ? 'Shell exist. Updating...' : 'Creating shell...',
+                    title: this.shell.directoryExists() ? 'Shell exists. Updating...' : 'Creating shell...',
                     options: { showTimer: true },
                     task: async (_, task) => {
                         await this.shell.generate()
