@@ -21,10 +21,11 @@ class Serve implements Command {
                             .then(() => (task.title = `Loader file ${chalk.cyan(ctx.loaderFileName)} created.`)),
                 },
                 {
-                    title: 'Preparing shell...',
+                    title: this.shell.shellExist() ? 'Shell exist. Updating...' : 'Creating shell...',
+                    options: { showTimer: true },
                     task: async (_, task) => {
                         await this.shell.generate()
-                        task.title = 'Shell construction complete.'
+                        task.title = 'Shell preparation complete.'
                     },
                 },
             ],

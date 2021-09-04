@@ -6,9 +6,11 @@ export interface TsConfigContent {
     angularCompilerOptions: {
         enableIvy: boolean
     }
+    files: {}
     compilerOptions: {
-        resolveJsonModule: boolean
-        rootDir: ''
+        preserveSymlinks?: boolean
+        resolveJsonModule?: boolean
+        rootDir?: ''
         paths?: { [key: string]: string[] }
         baseUrl: string
         [key: string]: any

@@ -3,6 +3,7 @@ import execa from 'execa'
 import * as cheerio from 'cheerio'
 import { readFile, outputFile } from 'fs-extra'
 import { join } from 'path'
+import { lookpath } from 'lookpath'
 
 @autoInjectable()
 @singleton()
@@ -12,10 +13,7 @@ export class NgCliService {
     /**
      * Creates new Angular Workspace
      */
-    async new(
-        name: string,
-        options?: { args: string[]; cwd?: string; options?: execa.Options; packageManager?: 'npm' | 'pnpm' | 'yarn' }
-    ): Promise<void> {
+    async new(name: string, options?: { args: string[]; cwd?: string; options?: execa.Options }): Promise<void> {
         await execa(this.bin, ['new', name, ...(options?.args ?? [])], {
             cwd: options?.cwd ?? process.cwd(),
             ...options?.options,
@@ -85,8 +83,7 @@ export class NgCliService {
     async createLoaderFile(outputPath: string, filename: string, serve?: boolean): Promise<void> {
         const encoding = 'utf8'
         const scripts = <string[]>[]
-
-        const indexHtml = serve
+        const indexHtml = serve // todo create template
             ? `<link rel="stylesheet" href="styles.css"><script src="runtime.js" defer></script><script src="polyfills.js" defer></script>
              <script src="vendor.js" defer></script><script src="main.js" defer></script></body>`
             : await readFile(join(outputPath, 'index.html'), { encoding })
@@ -96,4 +93,11 @@ export class NgCliService {
 
         await outputFile(join(outputPath, filename), scripts.join('\n'), { encoding })
     }
+
+    async install(cwd: string, silent = true): Promise<void> {
+        const pkgManager = await this.getPackageManager()
+        await execa.command(`${pkgManager} install`, { cwd, stdio: silent ? 'ignore' : 'inherit' })
+    }
+
+    private getPackageManager = async () => ((await lookpath('yarn')) ? 'yarn' : 'npm')
 }
