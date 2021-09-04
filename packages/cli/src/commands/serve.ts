@@ -22,6 +22,7 @@ class Serve implements Command {
                 },
                 {
                     title: 'Preparing shell...',
+                    options: { showTimer: true },
                     task: async (_, task) => {
                         await this.shell.generate()
                         task.title = 'Shell construction complete.'

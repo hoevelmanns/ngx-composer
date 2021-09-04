@@ -2,7 +2,7 @@ import { Listr } from 'listr2'
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Shell } from 'shell'
-import { ContextService, Ctx } from 'context'
+import { ContextService } from 'context'
 import { CommandBuilder } from 'yargs'
 import chalk from 'chalk'
 
@@ -14,10 +14,12 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: 'Preparing shell...',
-                    task: async (ctx, task) => this.shell.generate(ctx).then(() => (task.title = 'Shell construction complete.')),
+                    title: this.shell.shellExist() ? 'Creating shell...' : 'Shell exist! Updating shell...',
+                    options: { showTimer: true },
+                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell preparation complete.')),
                 },
                 {
+                    options: { showTimer: true },
                     task: async (ctx, task) =>
                         this.shell.build(ctx).then(() => (task.title = `Application built in ${chalk.cyan(ctx.outputPath)}`)),
                 },
