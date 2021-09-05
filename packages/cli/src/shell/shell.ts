@@ -8,11 +8,12 @@ import { Ctx } from 'context'
 import { existsSync } from 'fs'
 import { NgCliService } from '@ngx-composer/ng-tools'
 import { mergeJson } from 'merge-packages'
+import { name } from '../../package.json'
 
 @autoInjectable()
 export class Shell {
     protected readonly name = 'shell'
-    protected readonly cacheDir = join(process.env.PWD ?? '', 'node_modules', 'ngx-composer', '.cache') // todo replace 'ngx-composer' with var
+    protected readonly cacheDir = join(process.env.PWD ?? '', 'node_modules', name, '.cache') // todo replace 'ngx-composer' with var
     protected readonly path = join(this.cacheDir, this.name)
     protected readonly templateDir = join(process.cwd(), 'templates')
     protected readonly shellTsConfigPath = join(this.path, 'tsconfig.json')
