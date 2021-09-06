@@ -20,10 +20,9 @@ export class TreeService {
     getWorkspaces = (): Workspaces => this.workspaces
 
     private init(): TreeService {
-        const { directory, exclude } = <Argv>(
-            yargs(process.argv).options({ e: { alias: 'exclude' }, d: { alias: 'directory', default: '**' } }).argv
-        )
-        const ignore = ['**/{node_modules,vendor}/**'].concat([exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
+        const args = <Argv>yargs(process.argv)
+        const { directory, exclude } = args.options({ e: { alias: 'exclude' }, d: { alias: 'directory', default: '**' } }).argv
+        const ignore = ['**/{node_modules,vendor,.git}/**'].concat([exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
         const workspacesPaths: string[] = fg
             .sync(join(directory, 'angular.json'), { ignore })
             .map(ws => ws.replace('/angular.json', ''))

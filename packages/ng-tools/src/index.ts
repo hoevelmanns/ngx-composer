@@ -96,7 +96,7 @@ export class NgCliService {
 
     async install(cwd: string, silent = true): Promise<void> {
         const pkgManager = await this.getPackageManager()
-        await execa.command(`${pkgManager} install`, { cwd, stdio: silent ? 'ignore' : 'inherit' })
+        await execa(pkgManager, ['install'], { cwd, stdio: silent ? 'ignore' : 'inherit' })
     }
 
     private getPackageManager = async () => ((await lookpath('yarn')) ? 'yarn' : 'npm')

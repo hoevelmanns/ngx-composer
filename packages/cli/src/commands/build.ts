@@ -14,12 +14,10 @@ class Build implements Command {
         const tasks = new Listr(
             [
                 {
-                    title: this.shell.directoryExists() ? 'Shell exists. Updating...' : 'Creating shell...',
                     options: { showTimer: true },
-                    task: async (_, task) => await this.shell.generate(task).then(() => (task.title = 'Shell preparation complete.')),
+                    task: (_, task): Promise<Listr> => this.shell.generate(task),
                 },
                 {
-                    options: { showTimer: true },
                     task: async (ctx, task) =>
                         this.shell.build(ctx).then(() => (task.title = `Application built in ${chalk.cyan(ctx.outputPath)}`)),
                 },

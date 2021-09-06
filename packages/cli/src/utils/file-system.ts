@@ -1,5 +1,5 @@
 import { rmdirSync } from 'fs'
-import { mkdirpSync } from 'fs-extra'
+import { mkdirp } from 'fs-extra'
 
-export const cleanDir = (path: string): void => rmdirSync(path, { recursive: true })
-export const createDir = (path: string): void => mkdirpSync(path)
+export const cleanDir = async (path: string): Promise<void> => rmdirSync(path, { recursive: true })
+export const createDir = async (path: string): Promise<void> => await mkdirp(path)
