@@ -16,7 +16,7 @@ class Build implements Command {
                 {
                     title: this.shell.directoryExists() ? 'Shell exists. Updating...' : 'Creating shell...',
                     options: { showTimer: true },
-                    task: async (_, task) => this.shell.generate().then(() => (task.title = 'Shell preparation complete.')),
+                    task: async (_, task) => await this.shell.generate(task).then(() => (task.title = 'Shell preparation complete.')),
                 },
                 {
                     options: { showTimer: true },

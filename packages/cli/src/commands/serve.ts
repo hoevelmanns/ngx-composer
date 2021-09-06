@@ -24,7 +24,7 @@ class Serve implements Command {
                     title: this.shell.directoryExists() ? 'Shell exists. Updating...' : 'Creating shell...',
                     options: { showTimer: true },
                     task: async (_, task) => {
-                        await this.shell.generate()
+                        await this.shell.generate(task)
                         task.title = 'Shell preparation complete.'
                     },
                 },

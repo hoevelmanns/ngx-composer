@@ -1,14 +1,16 @@
-import { createDir, tsConfig } from 'utils'
-import { readJson, writeFile, writeJson } from 'fs-extra'
-import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
-import { autoInjectable, inject } from 'tsyringe'
-import { join } from 'path'
-import { TreeService } from 'tree'
-import { Ctx } from 'context'
-import { existsSync } from 'fs'
-import { NgCliService } from '@ngx-composer/ng-tools'
-import { mergeJson } from 'merge-packages'
-import { name } from '../../package.json'
+import {createDir, tsConfig} from 'utils'
+import {readJson, writeFile, writeJson} from 'fs-extra'
+import {ListrTaskResult} from 'listr2/dist/interfaces/listr.interface'
+import {autoInjectable, inject} from 'tsyringe'
+import {join} from 'path'
+import {TreeService} from 'tree'
+import {Ctx} from 'context'
+import {existsSync} from 'fs'
+import {NgCliService} from '@ngx-composer/ng-tools'
+import {mergeJson} from 'merge-packages'
+import {name} from '../../package.json'
+import {Listr} from "listr2"
+import {TaskWrapper} from "listr2/dist/lib/task-wrapper"
 
 @autoInjectable()
 export class Shell {
@@ -33,29 +35,55 @@ export class Shell {
 
     createLoaderFile = async (ctx: Ctx, serve?: boolean) => await this.ng.createLoaderFile(ctx.outputPath, ctx.loaderFileName, serve)
 
-    async generate(): Promise<void> {
-        !this.directoryExists() && createDir(this.cacheDir)
+    async generate(task: TaskWrapper<any, any>): Promise<void> {
 
-        await this.ng
-            .new(this.name, {
-                args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
-                cwd: this.cacheDir,
-            })
-            .catch(e => new Error('Error preparing shell:\n' + e.message))
+        return task.newListr(
+            [
+                {
+                    title: 'Creating application...',
+                    task: async () => {
+                        if (!this.directoryExists()) {
+                            createDir(this.cacheDir)
+                        }
 
-        await this.updateMain()
-        await this.updateTsConfig()
-        await this.updatePackageJson()
-        await this.ng.setUnlimitedBudget(this.name, this.path)
-        await this.ng.install(this.path)
+                        await this.ng
+                            .new(this.name, {
+                                args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
+                                cwd: this.cacheDir,
+                            })
+                            .catch(e => new Error('Error preparing shell:\n' + e.message))
+                    }
+                },
+                {
+                    title: 'Updating entrypoint...',
+                    task: async (_, task) => await this.updateMain().then(_ =>  task.title = 'Entrypoint updated.')
+                },
+                {
+                    title: 'Updating typescript configuration...',
+                    task: async (_, task) => await this.updateTsConfig().then(_ =>  task.title = 'Typescript configuration updated.')
+                },
+                {
+                    title: 'Merging dependencies from packages...',
+                    task: async (_, task) => await this.updatePackageJson().then(_ =>  task.title = 'Dependencies merged and are up-to-date.')
+                },
+                {
+                    title: 'Installing dependencies...',
+                    options: {persistentOutput: true},
+                    task: async (_, task) => {
+                        await this.ng.setUnlimitedBudget(this.name, this.path)
+                        await this.ng.install(this.path)
+                        task.title = 'Dependencies installed.'
+                    }
+                }
+            ]).run()
     }
 
     async serve(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
-        return this.ng.serve(ctx.ngOptions?.toArray(), this.path, { stdio: 'inherit' })
+        return this.ng.serve(ctx.ngOptions?.toArray(), this.path, {stdio: 'inherit'})
     }
 
     async build(ctx: Ctx): Promise<void> {
-        await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
+        await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, {stdio: 'inherit'})
     }
 
     protected async updatePackageJson(): Promise<void> {
@@ -69,43 +97,43 @@ export class Shell {
 
         const merged = {
             ...mergeJson(...pkgContents),
-            ...{ name: this.name, devDependencies: shellPkgJson.devDependencies },
+            ...{name: this.name, devDependencies: shellPkgJson.devDependencies},
         }
 
-        await writeJson(join(this.path, 'package.json'), merged, { spaces: '  ' })
+        await writeJson(join(this.path, 'package.json'), merged, {spaces: '  '})
     }
 
     protected async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
-        this.workspaces.forEach(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
+        this.workspaces.forEach(({defaultProject: {getWorkspaceDir, getTsConfig}}) => {
             const filePath = getWorkspaceDir()
             const compilerOptionsPaths = getTsConfig()?.compilerOptions?.paths
 
             const paths =
                 compilerOptionsPaths &&
                 Object.entries(compilerOptionsPaths)
-                    .map(([name, paths]) => ({ [name]: paths.map(p => join(process.cwd(), filePath, p).toString()) }))
-                    .reduce((cur, acc) => ({ ...cur, ...acc }), {})
+                    .map(([name, paths]) => ({[name]: paths.map(p => join(process.cwd(), filePath, p).toString())}))
+                    .reduce((cur, acc) => ({...cur, ...acc}), {})
 
-            paths && (shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...paths })
+            paths && (shellTsConfig.compilerOptions.paths = {...shellTsConfig.compilerOptions.paths, ...paths})
         })
 
         shellTsConfig.compilerOptions.paths = {
             ...shellTsConfig.compilerOptions.paths,
-            ...{ '@angular/*': ['./node_modules/@angular/*'], '*': ['./node_modules/*'] },
+            ...{'@angular/*': ['./node_modules/@angular/*'], '*': ['./node_modules/*']},
         }
 
         shellTsConfig.compilerOptions.allowSyntheticDefaultImports = true
         shellTsConfig.compilerOptions.preserveSymlinks = true
         shellTsConfig.compilerOptions.resolveJsonModule = true
 
-        await writeJson(this.shellTsConfigPath, shellTsConfig, { spaces: '  ' })
+        await writeJson(this.shellTsConfigPath, shellTsConfig, {spaces: '  '})
     }
 
     protected async updateMain(): Promise<void> {
-        const apps = this.workspaces.map(({ defaultProject }) => `export * from '${defaultProject.getMain()}'\n`)
-        const content = await this.eta.renderFile(this.mainTsTemplate, { apps })
+        const apps = this.workspaces.map(({defaultProject}) => `export * from '${defaultProject.getMain()}'\n`)
+        const content = await this.eta.renderFile(this.mainTsTemplate, {apps})
 
         await writeFile(this.mainTsPath, content)
     }
