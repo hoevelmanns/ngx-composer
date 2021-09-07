@@ -29,7 +29,6 @@
   "homepage": "https://github.com/hoevelmanns/ngx-composer/blob/master/packages/ng-tools#readme",
   "dependencies": {
     "@types/cheerio": "^0.22.30",
-    "cheerio": "^1.0.0-rc.10",
     "execa": "^5.1.1",
     "lookpath": "^1.2.2",
     "tsyringe": "^4.6.0",
