@@ -1,6 +1,8 @@
 import { autoInjectable, singleton } from 'tsyringe'
 import execa from 'execa'
 import { lookpath } from 'lookpath'
+import { existsSync } from 'fs-extra'
+import { join } from 'path'
 
 @autoInjectable()
 @singleton()
@@ -83,6 +85,14 @@ export class NgCliService {
     async install(cwd: string, silent = true): Promise<void> {
         const pkgManager = await this.getPackageManager()
         await execa(pkgManager, ['install'], { cwd, stdio: silent ? 'ignore' : 'inherit' })
+
+        /**
+         * Installs esbuild for latest angular/cli version. Important if 'ignore-scripts = true' is set in npm config
+         * @link https://github.com/evanw/esbuild/blob/master/npm/esbuild/bin/esbuild
+         */
+        if (existsSync(join(cwd, 'node_modules/esbuild/install.js'))) {
+            await execa.command('node node_modules/esbuild/install.js', { cwd }).catch(null)
+        }
     }
 
     private getPackageManager = async () => ((await lookpath('yarn')) ? 'yarn' : 'npm')
