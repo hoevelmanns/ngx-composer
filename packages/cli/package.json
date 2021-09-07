@@ -1,6 +1,6 @@
 {
 	"name": "@ngx-composer/cli",
-	"version": "1.11.6",
+	"version": "1.11.7",
 	"description": "Composes multiple Angular workspaces for building, serving and more without an overhead of configuration.",
 	"main": "build/index.js",
 	"bin": {
@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@ngx-composer/ng-tools": "1.1.4",
 		"chalk": "^4.1.2",
+		"cheerio": "^1.0.0-rc.10",
 		"eta": "^1.12.3",
 		"execa": "^5.1.1",
 		"fast-glob": "^3.2.7",
