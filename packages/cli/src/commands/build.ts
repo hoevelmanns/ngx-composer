@@ -2,13 +2,13 @@ import { Listr } from 'listr2'
 import { Argv, Command } from './types'
 import { container, inject, injectable } from 'tsyringe'
 import { Shell } from 'shell'
-import { ContextService } from 'context'
+import { Context } from 'context'
 import { CommandBuilder } from 'yargs'
 import chalk from 'chalk'
 
 @injectable()
 class Build implements Command {
-    constructor(@inject(Shell) private shell: Shell, @inject(ContextService) private context: ContextService) {}
+    constructor(@inject(Shell) private shell: Shell, @inject(Context) private context: Context) {}
 
     async run(argv: Argv, builder: CommandBuilder): Promise<void> {
         const tasks = new Listr(

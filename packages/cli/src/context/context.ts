@@ -4,7 +4,7 @@ import { removeProps, TransformArgOptions, transformArgOptions } from 'utils'
 import { makeAbsolute } from 'fast-glob/out/utils/path'
 
 @autoInjectable()
-export class ContextService {
+export class Context {
     buildContext = (argv: Argv, builder = <Argv>{}, ...excludeArgs): Ctx => {
         const { directory, singleBundle, concurrent, outputPath, loaderFileName, createLoaderFile } = argv
         const ctx: Ctx = {

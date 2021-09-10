@@ -19,21 +19,38 @@ export class Workspace {
             )
 
             console.error(message)
+
             process.exit()
         }
 
         this._defaultProject = Project.load(defaultProjectConfig, defaultProject, this.dir)
+
         this.package = Package.load(dir)
     }
 
     static load = (...args: ConstructorParameters<typeof Workspace>) => new Workspace(...args)
 
-    getPackage = (): Package => this.package
-    getDirectory = () => this.dir
+    getPackage(): Package {
+        return this.package
+    }
+
+    getDirectory(): string {
+        return this.dir
+    }
 
     get defaultProject(): Project {
         return this._defaultProject
     }
 }
 
-export type Workspaces = Workspace[]
+export class Workspaces {
+    private workspaces: Workspace[] = []
+
+    add(dir: string): void {
+        this.workspaces.push(Workspace.load(dir))
+    }
+
+    getAll(): Workspace[] {
+        return this.workspaces
+    }
+}

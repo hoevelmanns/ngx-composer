@@ -2,24 +2,18 @@ import { join } from 'path'
 import { readJSONSync } from 'fs-extra'
 import { existsSync } from 'fs'
 import chalk from 'chalk'
+import { mergeJson } from 'merge-packages'
 
-interface PkgJson {
+export interface PkgJson {
     name: string
-    dependencies: { [key: string]: string }
-    devDependencies: { [key: string]: string }
-    peerDependencies: { [key: string]: string }
+    dependencies?: { [key: string]: string }
+    devDependencies?: { [key: string]: string }
+    peerDependencies?: { [key: string]: string }
     [key: string]: any
 }
 
-export interface IPackage {
-    load(): IPackage
-    getPeerDependencies(): { [key: string]: string }
-    getDependencies(): { [key: string]: string }
-    getDevDependencies(): { [key: string]: string }
-}
-
 export class Package {
-    constructor(private pkgJson: PkgJson) {}
+    constructor(public content: PkgJson) {}
 
     static load = (dir: string): Package => {
         const pkgJsonPath = join(dir, 'package.json')
@@ -27,12 +21,34 @@ export class Package {
             console.error(chalk.red(`No package.json found at ${dir}`))
             process.exit(1)
         }
-        return new Package(readJSONSync(join(dir, 'package.json')))
+
+        const content = readJSONSync(join(dir, 'package.json'))
+
+        delete content.private
+
+        return new Package(content)
     }
 
-    getPeerDependencies = () => this.pkgJson.peerDependencies ?? {}
-    getDependencies = () => this.pkgJson.dependencies ?? {}
-    getDevDependencies = () => this.pkgJson.devDependencies ?? {}
+    getPeerDependencies() {
+        return this.content.peerDependencies ?? {}
+    }
 }
 
-export type Packages = Package[]
+export class Packages {
+    private packages: Package[] = []
+
+    add(dir: string): void {
+        this.packages.push(Package.load(dir))
+    }
+
+    getAll(): Package[] {
+        return this.packages
+    }
+
+    /**
+     * Merge the collected packages intelligently (uses the highest compatible version of a dependency)
+     */
+    merged(): PkgJson {
+        return mergeJson(...this.getAll().map(pkg => pkg.content))
+    }
+}

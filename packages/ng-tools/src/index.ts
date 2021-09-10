@@ -1,31 +1,28 @@
-import execa, {ExecaChildProcess} from 'execa'
-import {existsSync} from 'fs-extra'
-import {join} from 'path'
-import chalk from 'chalk'
+import execa, { ExecaChildProcess } from 'execa'
+import { existsSync } from 'fs-extra'
+import { join } from 'path'
 
-export const binDir = require('path').resolve(__dirname, '../node_modules/.bin/')
-export const npxBinNg = '@angular/cli@12.2.5'
-export const npxBinPackageManager = 'yarn@1.22.11'
-export const localBinNg = join(binDir, 'ng')
-
+const binDir = require('path').resolve(__dirname, '../node_modules/.bin/')
+const npxBinNg = (version = '12.2.5') => `@angular/cli@${version}`
+const npxBinPackageManager = 'yarn@1.22.11'
+const localBinNg = join(binDir, 'ng')
 
 /**
  * Runs the creation of a new Angular Workspace
  * @link https://angular.io/cli/new
  */
-export const ngCreate = async (name: string, options?: { args: string[]; cwd?: string; options?: execa.Options }): Promise<ExecaChildProcess> => {
-    return execa('npx', [npxBinNg, 'new', name, ...(options?.args ?? [])], {
+export const ngCreate = async (
+    name: string,
+    options?: {
+        args: string[]
+        cwd?: string
+        options?: execa.Options
+    },
+    version?: string
+): Promise<ExecaChildProcess> => {
+    return execa('npx', [npxBinNg(version), 'new', name, ...(options?.args ?? [])], {
         cwd: options?.cwd ?? process.cwd(),
         ...options?.options,
-    }).catch(e => {
-        if (e.message.includes('spawn ng ENOENT')) {
-            throw new Error(
-                `The Angular CLI was not found but is assumed. Please install the Angular CLI with: ${chalk.cyan(
-                    'npm install -g @angular/cli'
-                )}.`
-            )
-        }
-        throw new Error(e.message)
     })
 }
 
@@ -35,7 +32,7 @@ export const ngCreate = async (name: string, options?: { args: string[]; cwd?: s
  * @link https://angular.io/cli/build
  */
 export const ngBuild = async (args: string[], cwd?: string, options?: execa.Options): Promise<void> => {
-    await execa('npx', [localBinNg, 'build', ...args], {
+    await execa(localBinNg, ['build', ...args], {
         cwd,
         ...options,
     })
@@ -85,21 +82,20 @@ export const ngSetUnlimitedBudget = async (appName: string, dir: string): Promis
  * @link https://angular.io/cli/add
  */
 export const ngAdd = async (pkgName: string, cwd: string): Promise<void> => {
-    await execa(localBinNg, ['add', pkgName, '--skip-confirmation'], {cwd}).catch(null)
+    await execa(localBinNg, ['add', pkgName, '--skip-confirmation'], { cwd }).catch(null)
 }
 
 /**
  * Installs dependencies
  */
 export const ngInstall = async (cwd: string, silent = true): Promise<void> => {
-    await execa('npx', [npxBinPackageManager, 'install'], {cwd, stdio: silent ? 'ignore' : 'inherit'})
+    await execa('npx', [npxBinPackageManager, 'install'], { cwd, stdio: silent ? 'ignore' : 'inherit' })
 
     /**
      * Installs esbuild for latest angular/cli version. Important if 'ignore-scripts = true' is set in npm config
      * @link https://github.com/evanw/esbuild/blob/master/npm/esbuild/bin/esbuild
      */
     if (existsSync(join(cwd, 'node_modules/esbuild/install.js'))) {
-        await execa.command('node node_modules/esbuild/install.js', {cwd}).catch(null)
+        await execa.command('node node_modules/esbuild/install.js', { cwd }).catch(null)
     }
 }
-

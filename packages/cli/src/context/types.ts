@@ -20,5 +20,6 @@ export type Ctx = {
     concurrent?: boolean
     vendorChunk?: boolean
     namedChunks?: boolean
+    cliVersion?: string
 }
 export type Argv = { [key: string]: any }

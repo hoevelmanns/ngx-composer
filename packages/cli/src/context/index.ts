@@ -1,4 +1,4 @@
 import { Argv, Ctx } from './types'
 
-export { ContextService } from './context'
+export { Context } from './context'
 export { Argv, Ctx }

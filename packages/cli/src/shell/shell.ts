@@ -1,12 +1,10 @@
 import { createDir, tsConfig } from 'utils'
-import { outputFile, readFile, readJson, writeFile, writeJson } from 'fs-extra'
-import { ListrTaskResult } from 'listr2/dist/interfaces/listr.interface'
+import { outputFile, readFile, readJSONSync, writeFile, writeJson } from 'fs-extra'
 import { autoInjectable, inject } from 'tsyringe'
 import { join } from 'path'
-import { TreeService } from 'tree'
+import { Tree } from 'tree'
 import { Ctx } from 'context'
 import { existsSync } from 'fs'
-import { mergeJson } from 'merge-packages'
 import { name } from '../../package.json'
 import { Listr } from 'listr2'
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
@@ -26,9 +24,15 @@ export class Shell {
     protected readonly shellTsConfigPath = join(this.path, 'tsconfig.json')
     protected readonly mainTsPath = join(this.cacheDir, this.name, 'src', 'main.ts')
     private readonly eta = require('eta')
-    private readonly workspaces = this.treeService.getWorkspaces()
+    private readonly shellPackage = this.tree.packages.merged()
+    private readonly cliVersion =
+        this.shellPackage?.devDependencies &&
+        Object.entries(this.shellPackage.devDependencies)
+            .filter(([key, value]) => key === '@angular/cli')
+            .flat(1)
+            .pop()
 
-    constructor(@inject(TreeService) private treeService: TreeService) {
+    constructor(@inject(Tree) private tree: Tree) {
         this.eta.configure({
             autoEscape: false,
             views: this.templateDir,
@@ -47,35 +51,36 @@ export class Shell {
         return mainTask.newListr(
             [
                 {
-                    enabled: () => !existsSync(this.path),
-                    title: 'Creating shell...',
+                    enabled: () => !existsSync(this.path), // todo consider force option
+                    title: `Creating shell using Angular CLI Version ${this.cliVersion}`,
                     task: async (_, task) => {
-                        await ngCreate(this.name, {
-                            args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
-                            cwd: this.cacheDir,
-                        })
+                        await ngCreate(
+                            this.name,
+                            {
+                                args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
+                                cwd: this.cacheDir,
+                            },
+                            this.cliVersion
+                        )
 
-                        task.title = 'Shell created'
+                        await ngSetUnlimitedBudget(this.name, this.path)
+
+                        task.title = 'Shell created.'
                     },
-                },
-                {
-                    title: 'Updating entrypoint...',
-                    task: async (_, task) => await this.updateMain().then(_ => (task.title = 'Entrypoint updated.')),
                 },
                 {
                     title: 'Updating typescript configuration...',
                     task: async (_, task) => await this.updateTsConfig().then(_ => (task.title = 'Typescript configuration updated.')),
                 },
                 {
-                    title: 'Merging dependencies from packages...',
-                    task: async (_, task) =>
-                        await this.updatePackageJson().then(_ => (task.title = 'Dependencies merged and are up-to-date.')),
+                    title: 'Updating entrypoint...',
+                    task: async (_, task) => await this.updateMain().then(_ => (task.title = 'Entrypoint updated.')),
                 },
                 {
                     title: 'Installing dependencies...',
                     options: { persistentOutput: true },
                     task: async (_, task) => {
-                        await ngSetUnlimitedBudget(this.name, this.path)
+                        await this.updateShellPackageJson()
                         await ngInstall(this.path)
                         task.title = 'Dependencies installed.'
                     },
@@ -94,12 +99,16 @@ export class Shell {
     /**
      * Runs the serve process of the shell application.
      */
-    serve = async (ctx: Ctx): Promise<ListrTaskResult<Ctx>> => ngServe(ctx.ngOptions?.toArray(), this.path, { stdio: 'inherit' })
+    async serve(ctx: Ctx): Promise<void> {
+        await ngServe(ctx.ngOptions?.toArray(), this.path, { stdio: 'inherit' })
+    }
 
     /**
      * Runs the build process of the shell application.
      */
-    build = async (ctx: Ctx): Promise<void> => await ngBuild(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
+    async build(ctx: Ctx): Promise<void> {
+        await ngBuild(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
+    }
 
     /**
      * Creates a file containing only the shell dist scripts.
@@ -110,32 +119,28 @@ export class Shell {
         const indexHtml = serve
             ? this.eta.renderFile('app-loader.dev.eta')
             : await readFile(join(ctx.outputPath, 'index.html'), { encoding })
-
         const $ = cheerio.load(indexHtml)
+
         $('script, link[rel="stylesheet"]').each((index, elem) => scripts.push($.html(elem)))
 
         await outputFile(join(ctx.outputPath, ctx.loaderFileName), scripts.join('\n'), { encoding })
     }
 
     /**
-     * Collects all packages of Angular workspaces, merges them intelligently (uses the highest compatible version of a dependency)
-     * and writes the result to shell-package.json.
+     * Updates the shell package json with the merged packages dependencies
      */
-    private async updatePackageJson(): Promise<void> {
-        const shellPkgJson = await readJson(join(this.path, 'package.json'))
-        const pkgContents = await Promise.all(this.workspaces.map(async ws => await readJson(join(ws.getDirectory(), 'package.json'))))
-
-        pkgContents.map(c => delete c.private && delete c.scripts).concat(shellPkgJson)
-
-        const merged = {
-            ...mergeJson(...pkgContents),
-            ...{
-                name: this.name,
-                devDependencies: shellPkgJson.devDependencies,
+    private async updateShellPackageJson(): Promise<void> {
+        await writeJson(
+            join(this.path, 'package.json'),
+            {
+                ...this.shellPackage,
+                ...{
+                    name: '@rdss/ng-shell',
+                    devDependencies: readJSONSync(join(this.path, 'package.json'))?.devDependencies ?? {},
+                },
             },
-        }
-
-        await writeJson(join(this.path, 'package.json'), merged, { spaces: '  ' })
+            { spaces: '  ' }
+        )
     }
 
     /**
@@ -145,7 +150,7 @@ export class Shell {
     private async updateTsConfig(): Promise<void> {
         const shellTsConfig = tsConfig.find(this.shellTsConfigPath).getContent()
 
-        this.workspaces.forEach(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
+        this.tree.workspaces.getAll().forEach(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
             const workspaceDir = getWorkspaceDir()
             const compilerOptionsPaths = getTsConfig()?.compilerOptions?.paths
             const paths =
@@ -175,7 +180,7 @@ export class Shell {
     }
 
     private async updateMain(): Promise<void> {
-        const apps = this.workspaces.map(({ defaultProject }) => `export * from '${defaultProject.getMain()}'\n`)
+        const apps = this.tree.workspaces.getAll().map(({ defaultProject }) => `export * from '${defaultProject.getMain()}'\n`)
         const content = await this.eta.renderFile('main.ts.eta', { apps })
 
         await writeFile(this.mainTsPath, content)
