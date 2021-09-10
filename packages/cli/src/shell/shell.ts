@@ -6,12 +6,12 @@ import { join } from 'path'
 import { TreeService } from 'tree'
 import { Ctx } from 'context'
 import { existsSync } from 'fs'
-import { NgCliService } from '@ngx-composer/ng-tools'
 import { mergeJson } from 'merge-packages'
 import { name } from '../../package.json'
 import { Listr } from 'listr2'
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper'
 import * as cheerio from 'cheerio'
+import { ngInstall, ngCreate, ngSetUnlimitedBudget, ngBuild, ngServe } from '@ngx-composer/ng-tools'
 
 /**
  * The shell application is used to bootstrap the default projects of the collected Angular workspaces together.
@@ -28,7 +28,7 @@ export class Shell {
     private readonly eta = require('eta')
     private readonly workspaces = this.treeService.getWorkspaces()
 
-    constructor(@inject(TreeService) private treeService: TreeService, @inject(NgCliService) private ng: NgCliService) {
+    constructor(@inject(TreeService) private treeService: TreeService) {
         this.eta.configure({
             autoEscape: false,
             views: this.templateDir,
@@ -40,9 +40,6 @@ export class Shell {
      * todo add more information
      */
     async generate(mainTask: TaskWrapper<any, any>): Promise<Listr> {
-
-        const shellExists = existsSync(this.cacheDir)
-
         await createDir(this.cacheDir)
 
         mainTask.title = 'Preparing shell application...'
@@ -50,16 +47,15 @@ export class Shell {
         return mainTask.newListr(
             [
                 {
-                    title: shellExists ? 'Shell exists. Updating...' : 'Creating shell...',
+                    enabled: () => !existsSync(this.path),
+                    title: 'Creating shell...',
                     task: async (_, task) => {
-                        await this.ng
-                            .new(this.name, {
-                                args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
-                                cwd: this.cacheDir,
-                            })
-                            .catch(e => new Error('Error preparing shell:\n' + e.message))
+                        await ngCreate(this.name, {
+                            args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
+                            cwd: this.cacheDir,
+                        })
 
-                        task.title = `Shell ${shellExists ? 'updated' : 'created'}.`
+                        task.title = 'Shell created'
                     },
                 },
                 {
@@ -79,8 +75,8 @@ export class Shell {
                     title: 'Installing dependencies...',
                     options: { persistentOutput: true },
                     task: async (_, task) => {
-                        await this.ng.setUnlimitedBudget(this.name, this.path)
-                        await this.ng.install(this.path)
+                        await ngSetUnlimitedBudget(this.name, this.path)
+                        await ngInstall(this.path)
                         task.title = 'Dependencies installed.'
                     },
                 },
@@ -89,6 +85,7 @@ export class Shell {
                 },
             ],
             {
+                exitOnError: true,
                 rendererOptions: { showTimer: true },
             }
         )
@@ -97,16 +94,12 @@ export class Shell {
     /**
      * Runs the serve process of the shell application.
      */
-    async serve(ctx: Ctx): Promise<ListrTaskResult<Ctx>> {
-        return this.ng.serve(ctx.ngOptions?.toArray(), this.path, { stdio: 'inherit' })
-    }
+    serve = async (ctx: Ctx): Promise<ListrTaskResult<Ctx>> => ngServe(ctx.ngOptions?.toArray(), this.path, { stdio: 'inherit' })
 
     /**
      * Runs the build process of the shell application.
      */
-    async build(ctx: Ctx): Promise<void> {
-        await this.ng.build(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
-    }
+    build = async (ctx: Ctx): Promise<void> => await ngBuild(['--output-path', ctx.outputPath, ...ctx.ngOptions.toArray()], this.path, { stdio: 'inherit' })
 
     /**
      * Creates a file containing only the shell dist scripts.
@@ -136,7 +129,10 @@ export class Shell {
 
         const merged = {
             ...mergeJson(...pkgContents),
-            ...{ name: this.name, devDependencies: shellPkgJson.devDependencies },
+            ...{
+                name: this.name,
+                devDependencies: shellPkgJson.devDependencies,
+            },
         }
 
         await writeJson(join(this.path, 'package.json'), merged, { spaces: '  ' })
@@ -152,14 +148,15 @@ export class Shell {
         this.workspaces.forEach(({ defaultProject: { getWorkspaceDir, getTsConfig } }) => {
             const workspaceDir = getWorkspaceDir()
             const compilerOptionsPaths = getTsConfig()?.compilerOptions?.paths
-
             const paths =
                 compilerOptionsPaths &&
                 Object.entries(compilerOptionsPaths)
                     .map(([name, paths]) => ({ [name]: paths.map(p => join(process.cwd(), workspaceDir, p).toString()) }))
                     .reduce((cur, acc) => ({ ...cur, ...acc }), {})
 
-            paths && (shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...paths })
+            if (paths) {
+                shellTsConfig.compilerOptions.paths = { ...shellTsConfig.compilerOptions.paths, ...paths }
+            }
         })
 
         shellTsConfig.compilerOptions.paths = {

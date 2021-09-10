@@ -18,6 +18,7 @@ class Build implements Command {
                     task: (_, task): Promise<Listr> => this.shell.generate(task),
                 },
                 {
+                    options: { showTimer: true },
                     task: async (ctx, task) =>
                         this.shell.build(ctx).then(() => (task.title = `Application built in ${chalk.cyan(ctx.outputPath)}`)),
                 },
@@ -38,7 +39,6 @@ class Build implements Command {
         )
 
         await tasks.run().catch(e => {
-            console.error('Error running build:')
             console.error(e.stderr ?? e.message)
             process.exit(1)
         })
