@@ -13,7 +13,6 @@ import { ngInstall, ngCreate, ngSetUnlimitedBudget, ngBuild, ngServe } from '@ng
 
 /**
  * The shell application is used to bootstrap the default projects of the collected Angular workspaces together.
- * todo add more information
  */
 @autoInjectable()
 export class Shell {
@@ -23,14 +22,9 @@ export class Shell {
     protected readonly templateDir = join(__dirname, 'templates')
     protected readonly shellTsConfigPath = join(this.path, 'tsconfig.json')
     protected readonly mainTsPath = join(this.cacheDir, this.name, 'src', 'main.ts')
+    private readonly shellPackage = this.tree.packages.merged
+    private readonly cliVersion = this.shellPackage.findDependency('@angular/cli')?.version
     private readonly eta = require('eta')
-    private readonly shellPackage = this.tree.packages.merged()
-    private readonly cliVersion =
-        this.shellPackage?.devDependencies &&
-        Object.entries(this.shellPackage.devDependencies)
-            .filter(([key, value]) => key === '@angular/cli')
-            .flat(1)
-            .pop()
 
     constructor(@inject(Tree) private tree: Tree) {
         this.eta.configure({
@@ -131,17 +125,16 @@ export class Shell {
      * Updates the shell package json with the merged packages dependencies
      */
     private async updateShellPackageJson(): Promise<void> {
-        await writeJson(
-            join(this.path, 'package.json'),
-            {
+        const content = {
                 ...this.shellPackage,
                 ...{
                     name: '@rdss/ng-shell',
                     devDependencies: readJSONSync(join(this.path, 'package.json'))?.devDependencies ?? {},
                 },
-            },
-            { spaces: '  ' }
-        )
+            }
+
+            // todo create save method in Package
+        await writeJson(join(this.path, 'package.json'), content, { spaces: '  ' })
     }
 
     /**

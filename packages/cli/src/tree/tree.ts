@@ -9,6 +9,9 @@ import { Workspaces } from './workspace'
 import { getBorderCharacters, table } from 'table'
 import { Packages } from './package'
 
+/**
+ * Provides the workspaces with its packages and configurations
+ */
 @singleton()
 @autoInjectable()
 export class Tree {
@@ -19,13 +22,10 @@ export class Tree {
         this.init()
     }
 
-    private init(): Tree {
+    protected init(): Tree {
         const args = <Argv>yargs(process.argv)
         const { directory, exclude } = args.options({ e: { alias: 'exclude' }, d: { alias: 'directory', default: '**' } }).argv
-        const ignore = ['**/{node_modules,vendor,.git}/**'].concat([exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
-        const workspacesPaths: string[] = fg
-            .sync(join(directory, 'angular.json'), { ignore })
-            .map(ws => ws.replace('/angular.json', ''))
+        const workspacesPaths = this.searchWorkspaces(directory, exclude)
 
         workspacesPaths.forEach(dir => {
             this.workspaces.add(dir)
@@ -42,8 +42,26 @@ export class Tree {
         return this
     }
 
-    private listWorkspaces(): void {
-        const workspaces = this.workspaces.getAll()
+    /**
+     * Searches the specified directory recursively for angular configurations (angular.json)
+     *
+     * @param directory - The directory to be searched
+     * @param exclude - Excluded directories or glob
+     */
+    protected searchWorkspaces(directory: string, exclude: string[]) {
+        const ignore = ['**/{node_modules,vendor,.git}/**'].concat([exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
+        const workspacesPaths: string[] = fg
+            .sync(join(directory, 'angular.json'), { ignore })
+            .map(ws => ws.replace('/angular.json', ''))
+
+        return workspacesPaths
+    }
+
+    /**
+     * Displays the founded workspaces in a table
+     */
+    protected listWorkspaces(): void {
+        const workspaces = this.workspaces.find()
         const workspaceTable = [[chalk.bold.whiteBright('Workspace Directory'), '|', chalk.bold.whiteBright('Default Project')]]
         const msgFoundedWorkspaces = [`Found ${workspaces.length} angular`, workspaces.length === 1 ? 'workspace' : 'workspaces']
             .join(' ')
@@ -56,7 +74,11 @@ export class Tree {
         console.log(chalk.white(this.outputTable(workspaceTable)))
     }
 
-    private outputTable = (data: string[][], drawHorizontalLines = false) =>
+    /**
+     * Produces a string that represents array data in a text table.
+     * @link https://www.npmjs.com/package/table
+     */
+    protected outputTable = (data: string[][], drawHorizontalLines = false) =>
         table(data, {
             border: getBorderCharacters('void'),
             columnDefault: { paddingLeft: 0, paddingRight: 2 },
