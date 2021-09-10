@@ -4,6 +4,8 @@ Composes multiple Angular workspaces for building, serving and more without an o
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/74da2fd774574631b3c02c51ed53a293)](https://www.codacy.com/gh/hoevelmanns/ngx-composer/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hoevelmanns/ngx-composer&amp;utm_campaign=Badge_Grade)
 
+[![Example](https://raw.githubusercontent.com/hoevelmanns/ngx-composer/main/packages/cli/assets/example.svg)](https://asciinema.org/a/Y7xHjoXeK3WEx1vxAsbCUW5Ok?t=1)
+
 ## Commands
 
 ### Build

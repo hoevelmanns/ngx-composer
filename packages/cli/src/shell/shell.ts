@@ -91,6 +91,7 @@ export class Shell {
             ],
             {
                 exitOnError: true,
+                registerSignalListeners: true,
                 rendererOptions: { showTimer: true },
             }
         )

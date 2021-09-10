@@ -24,6 +24,9 @@ class Serve implements Command {
                     options: { showTimer: true },
                     task: async (_, task) => await this.shell.generate(task),
                 },
+                {
+                    task: async ctx => this.shell.serve(ctx)
+                }
             ],
             {
                 ctx: this.context.buildContext(argv, builder),
@@ -33,7 +36,6 @@ class Serve implements Command {
 
         await tasks
             .run()
-            .then(ctx => this.shell.serve(ctx))
             .catch(e => {
                 console.error('Error serving app')
                 console.error(e.stderr ?? e.message)
