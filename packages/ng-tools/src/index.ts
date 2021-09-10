@@ -84,7 +84,10 @@ export class NgCliService {
      */
     async install(cwd: string, silent = true): Promise<void> {
         const pkgManager = await this.getPackageManager()
-        await execa(pkgManager, ['install'], { cwd, stdio: silent ? 'ignore' : 'inherit' })
+        const args = pkgManager === 'npm' ? ['--package-lock', 'false'] : ['--no-lockfile']
+        // todo run ngcc if pkgManager changed
+        // todo or remove lock-files and node_modules
+        await execa(pkgManager, ['install', ...args], { cwd, stdio: silent ? 'ignore' : 'inherit' })
 
         /**
          * Installs esbuild for latest angular/cli version. Important if 'ignore-scripts = true' is set in npm config

@@ -35,26 +35,23 @@ export class Shell {
         })
     }
 
-    directoryExists = () => existsSync(this.cacheDir)
-
     /**
      * Generates the shell application.
      * todo add more information
      */
     async generate(mainTask: TaskWrapper<any, any>): Promise<Listr> {
-        const shellExist = this.directoryExists()
+
+        const shellExists = existsSync(this.cacheDir)
+
+        await createDir(this.cacheDir)
 
         mainTask.title = 'Preparing shell application...'
 
         return mainTask.newListr(
             [
                 {
-                    title: shellExist ? 'Shell exists. Updating...' : 'Creating shell...',
+                    title: shellExists ? 'Shell exists. Updating...' : 'Creating shell...',
                     task: async (_, task) => {
-                        if (!this.directoryExists()) {
-                            await createDir(this.cacheDir)
-                        }
-
                         await this.ng
                             .new(this.name, {
                                 args: ['--defaults', '--minimal', '--skip-git', '--skip-tests', '--skip-install'],
@@ -62,7 +59,7 @@ export class Shell {
                             })
                             .catch(e => new Error('Error preparing shell:\n' + e.message))
 
-                        task.title = `Shell ${shellExist ? 'updated' : 'created'}.`
+                        task.title = `Shell ${shellExists ? 'updated' : 'created'}.`
                     },
                 },
                 {
