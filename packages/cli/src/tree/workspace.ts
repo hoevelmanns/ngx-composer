@@ -61,19 +61,19 @@ export class Workspaces {
     private workspaces: Workspace[] = []
 
     /**
+     * Gets all workspaces
+     */
+    get all() {
+        return this.workspaces
+    }
+
+    /**
      * Adds the workspace by given directory
      *
      * @param {string} dir - The directory of a workspace
      */
     add(dir: string): void {
         this.workspaces.push(Workspace.load(dir))
-    }
-
-    /**
-     * Gets all workspaces
-     */
-    getAll() {
-        return this.find()
     }
 
     /**

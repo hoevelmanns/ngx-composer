@@ -8,12 +8,12 @@ export interface TsConfigContent {
     }
     files: {}
     compilerOptions: {
-        allowSyntheticDefaultImports: boolean
+        allowSyntheticDefaultImports?: boolean
         preserveSymlinks?: boolean
         resolveJsonModule?: boolean
-        rootDir?: ''
-        paths?: { [key: string]: string[] }
-        baseUrl: string
+        rootDir?: string
+        paths: { [key: string]: string[] }
+        baseUrl?: string
         [key: string]: any
     }
 }
@@ -34,12 +34,6 @@ class TsConfig {
 
         this.config = findBaseTsConfig(configPath)
 
-        return this
-    }
-
-    // todo
-    assign(content: TsConfigContent): TsConfig {
-        Object.assign(this.config, content)
         return this
     }
 

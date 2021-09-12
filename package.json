@@ -27,7 +27,7 @@
     "bugs": {
         "url": "https://github.com/hoevelmanns/ngx-composer/issues"
     },
-    "homepage": "https://github.com/hoevelmanns/ngx-composer#readme",
+    "homepage": "https://github.com/hoevelmanns/ngx-composer/tree/main/packages/cli",
     "lint-staged": {
         "**/*": "prettier --write --ignore-unknown"
     }

@@ -57,7 +57,7 @@ export class Package {
             : {}
     }
 
-    get json(): PkgJson {
+    getContent(): PkgJson {
         return this.content
     }
 
@@ -95,6 +95,6 @@ export class Packages {
      */
     merge(): Package {
         // todo error handling
-        return new Package(mergeJson(...this.getAll().map(pkg => pkg.json)), '')
+        return new Package(mergeJson(...this.getAll().map(pkg => pkg.getContent())), '')
     }
 }

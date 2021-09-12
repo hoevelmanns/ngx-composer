@@ -1,49 +1,6 @@
-import { Listr } from 'listr2'
-import { Argv, Command } from './types'
-import { container, inject, injectable } from 'tsyringe'
+import { Argv } from './types'
+import { container } from 'tsyringe'
 import { Shell } from 'shell'
-import { Context } from 'context'
-import { CommandBuilder } from 'yargs'
-import chalk from 'chalk'
-
-@injectable()
-class Build implements Command {
-    constructor(@inject(Shell) private shell: Shell, @inject(Context) private context: Context) {}
-
-    async run(argv: Argv, builder: CommandBuilder): Promise<void> {
-        const tasks = new Listr(
-            [
-                {
-                    options: { showTimer: true },
-                    task: (_, task): Promise<Listr> => this.shell.generate(task),
-                },
-                {
-                    options: { showTimer: true },
-                    task: async (ctx, task) =>
-                        this.shell.build(ctx).then(() => (task.title = `Application built in ${chalk.cyan(ctx.outputPath)}`)),
-                },
-                {
-                    enabled: ctx => ctx.createLoaderFile,
-                    task: async (ctx, task) =>
-                        this.shell
-                            .createLoader(ctx)
-                            .then(() => (task.title = `Loader file ${chalk.cyan(ctx.loaderFileName)} created.`)),
-                },
-            ],
-            {
-                exitOnError: true,
-                rendererOptions: { showErrorMessage: false },
-                registerSignalListeners: true,
-                ctx: this.context.buildContext(argv, builder),
-            }
-        )
-
-        await tasks.run().catch(e => {
-            console.error(e.stderr ?? e.message)
-            process.exit(1)
-        })
-    }
-}
 
 /**
  * Command definition
@@ -56,31 +13,37 @@ export const builder = {
         description: 'Directory or glob (e.g. "custom/plugins/**") to define the apps to process.',
         default: '**',
         alias: 'd',
+        type: 'string',
     },
     exclude: {
-        description: 'Exclude specified path or glob. Can be used many times.',
+        description: 'Exclude specified path or glob.',
         alias: 'e',
+        type: 'array',
     },
-    'single-bundle': { description: 'Only build the shell app.', alias: 's', default: true },
-    concurrent: {
-        description: 'Run the tasks concurrently.',
-        default: true,
-        alias: 'c',
+    outputPath: {
+        description: 'The full path for the new output directory',
+        default: 'dist',
+        type: 'string',
     },
     'vendor-chunk': {
         description: 'Generate a separate bundle containing only vendor libraries.',
+        type: 'boolean',
         default: false,
     },
     'named-chunks': {
         description: 'Use file name for lazy loaded chunks.',
-        default: true,
+        default: false,
+        type: 'boolean',
     },
     'create-loader-file': {
         description: 'Creates a template containing only the angular dist scripts',
+        type: 'boolean',
+        default: false,
     },
     'loader-file-name': {
         description: 'The name of the loader file',
         default: 'app-loader.tpl',
+        type: 'string',
     },
 }
-export const handler = (argv: Argv) => container.resolve(Build).run(argv, builder)
+export const handler = (argv: Argv) => container.resolve(Shell).build(argv)

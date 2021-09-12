@@ -6,25 +6,33 @@ import { join } from 'path'
 import { Workspaces } from './workspace'
 import { getBorderCharacters, table } from 'table'
 import { Packages } from './package'
+import { Argv } from './types'
+import yargs from 'yargs'
 
 /**
  * Provides the workspaces with its packages and configurations
  */
 @singleton()
 export class Tree {
-    workspaceDirs = <string[]>[]
+    private workspaceDirs = <string[]>[]
+    private args = <Argv>yargs(process.argv)
+    private options = this.args.options({ e: { alias: 'exclude', type: 'array' }, d: { alias: 'directory', default: '**' } }).argv
 
-    constructor(@inject(Workspaces) readonly workspaces: Workspaces, @inject(Packages) readonly packages: Packages) {}
+    constructor(@inject(Workspaces) readonly workspaces: Workspaces, @inject(Packages) readonly packages: Packages) {
+        this.init()
+    }
 
-    /**
-     * todo
-     *
-     * @param directory - The directory to be searched
-     * @param exclude - Excluded directories or glob
-     */
-    init(directory: string, exclude: string[]) {
-        const ignore = ['**/{node_modules,vendor,.git}/**'].concat([exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
-        this.workspaceDirs = fg.sync(join(directory, 'angular.json'), { ignore }).map(ws => ws.replace('/angular.json', ''))
+    init(directory?: string, exclude?: string | string[]) {
+        this.options.exclude = exclude ?? this.options.exclude
+        this.options.directory = directory ?? this.options.directory
+
+        const ignore = ['**/{node_modules,vendor,.git}/**'].concat(
+            [this.options.exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`))
+        )
+
+        this.workspaceDirs = fg
+            .sync(join(this.options.directory, 'angular.json'), { ignore })
+            .map(ws => ws.replace('angular.json', ''))
 
         this.workspaceDirs.forEach(dir => {
             this.workspaces.add(dir)

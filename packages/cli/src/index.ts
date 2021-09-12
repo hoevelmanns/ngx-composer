@@ -16,9 +16,13 @@ import('./commands').then(
     commands =>
         Object.entries(commands.default).map(command => yargs.command(command.pop())) &&
         yargs
+            .parserConfiguration({
+                'strip-aliased': true,
+                'duplicate-arguments-array': false,
+            })
             .commands({ command: '*', handler: () => yargs.showHelp() })
             .scriptName(cliBinName ?? 'NGX Composer')
             .usage(`$0 <cmd> [args]`)
-            .version(version)
+            .wrap(Math.min(100, yargs.terminalWidth()))
             .help().argv
 )
