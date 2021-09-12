@@ -26,7 +26,7 @@ class Build implements Command {
                     enabled: ctx => ctx.createLoaderFile,
                     task: async (ctx, task) =>
                         this.shell
-                            .createLoaderFile(ctx)
+                            .createLoader(ctx)
                             .then(() => (task.title = `Loader file ${chalk.cyan(ctx.loaderFileName)} created.`)),
                 },
             ],

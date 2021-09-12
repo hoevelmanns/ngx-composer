@@ -1,10 +1,8 @@
 import * as fg from 'fast-glob'
 import chalk from 'chalk'
-import { autoInjectable, singleton } from 'tsyringe'
+import { inject, singleton } from 'tsyringe'
 import isGlob from 'is-glob'
 import { join } from 'path'
-import yargs from 'yargs'
-import { Argv } from './types'
 import { Workspaces } from './workspace'
 import { getBorderCharacters, table } from 'table'
 import { Packages } from './package'
@@ -13,54 +11,38 @@ import { Packages } from './package'
  * Provides the workspaces with its packages and configurations
  */
 @singleton()
-@autoInjectable()
 export class Tree {
-    readonly workspaces = new Workspaces()
-    readonly packages = new Packages()
+    workspaceDirs = <string[]>[]
 
-    constructor() {
-        this.init()
-    }
+    constructor(@inject(Workspaces) readonly workspaces: Workspaces, @inject(Packages) readonly packages: Packages) {}
 
-    protected init(): Tree {
-        const args = <Argv>yargs(process.argv)
-        const { directory, exclude } = args.options({ e: { alias: 'exclude' }, d: { alias: 'directory', default: '**' } }).argv
-        const workspacesPaths = this.searchWorkspaces(directory, exclude)
+    /**
+     * todo
+     *
+     * @param directory - The directory to be searched
+     * @param exclude - Excluded directories or glob
+     */
+    init(directory: string, exclude: string[]) {
+        const ignore = ['**/{node_modules,vendor,.git}/**'].concat([exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
+        this.workspaceDirs = fg.sync(join(directory, 'angular.json'), { ignore }).map(ws => ws.replace('/angular.json', ''))
 
-        workspacesPaths.forEach(dir => {
+        this.workspaceDirs.forEach(dir => {
             this.workspaces.add(dir)
             this.packages.add(dir)
         })
 
-        if (!workspacesPaths.length) {
+        if (!this.workspaceDirs.length) {
             console.log(chalk.cyan('No angular workspaces found. Nothing to do.'))
             process.exit(0)
         }
-
-        this.listWorkspaces()
 
         return this
     }
 
     /**
-     * Searches the specified directory recursively for angular configurations (angular.json)
-     *
-     * @param directory - The directory to be searched
-     * @param exclude - Excluded directories or glob
-     */
-    protected searchWorkspaces(directory: string, exclude: string[]) {
-        const ignore = ['**/{node_modules,vendor,.git}/**'].concat([exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
-        const workspacesPaths: string[] = fg
-            .sync(join(directory, 'angular.json'), { ignore })
-            .map(ws => ws.replace('/angular.json', ''))
-
-        return workspacesPaths
-    }
-
-    /**
      * Displays the founded workspaces in a table
      */
-    protected listWorkspaces(): void {
+    listWorkspaces(): Tree {
         const workspaces = this.workspaces.find()
         const workspaceTable = [[chalk.bold.whiteBright('Workspace Directory'), '|', chalk.bold.whiteBright('Default Project')]]
         const msgFoundedWorkspaces = [`Found ${workspaces.length} angular`, workspaces.length === 1 ? 'workspace' : 'workspaces']
@@ -71,7 +53,9 @@ export class Tree {
 
         console.log(chalk.bold.cyanBright(msgFoundedWorkspaces))
 
-        console.log(chalk.white(this.outputTable(workspaceTable)))
+        console.log(chalk.white(this.outputTable(workspaceTable)), '\n')
+
+        return this
     }
 
     /**

@@ -17,7 +17,7 @@ class Serve implements Command {
                     enabled: ctx => ctx.createLoaderFile,
                     task: async (ctx, task) =>
                         this.shell
-                            .createLoaderFile(ctx, true)
+                            .createLoader(ctx, true)
                             .then(() => (task.title = `Loader file ${chalk.cyan(ctx.loaderFileName)} created.`)),
                 },
                 {
@@ -25,8 +25,8 @@ class Serve implements Command {
                     task: async (_, task) => await this.shell.generate(task),
                 },
                 {
-                    task: async ctx => this.shell.serve(ctx)
-                }
+                    task: async ctx => this.shell.serve(ctx),
+                },
             ],
             {
                 ctx: this.context.buildContext(argv, builder),
@@ -34,13 +34,11 @@ class Serve implements Command {
             }
         )
 
-        await tasks
-            .run()
-            .catch(e => {
-                console.error('Error serving app')
-                console.error(e.stderr ?? e.message)
-                process.exit(1)
-            })
+        await tasks.run().catch(e => {
+            console.error('Error serving app')
+            console.error(e.stderr ?? e.message)
+            process.exit(1)
+        })
     }
 }
 

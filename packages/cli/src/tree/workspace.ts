@@ -3,6 +3,7 @@ import { readJSONSync } from 'fs-extra'
 import { Project } from './project'
 import { Package } from './package'
 import chalk from 'chalk'
+import { autoInjectable } from 'tsyringe'
 
 /**
  * The Angular Workspace
@@ -55,6 +56,7 @@ export class Workspace {
     }
 }
 
+@autoInjectable()
 export class Workspaces {
     private workspaces: Workspace[] = []
 
@@ -80,8 +82,6 @@ export class Workspaces {
      * @param {string} name - The name of the default project in the workspace
      */
     find(name?: string): Workspace[] {
-        return name
-            ? this.workspaces.filter(ws => ws.defaultProject.getName() === name) ?? []
-            : this.workspaces
+        return name ? this.workspaces.filter(ws => ws.defaultProject.getName() === name) ?? [] : this.workspaces
     }
 }

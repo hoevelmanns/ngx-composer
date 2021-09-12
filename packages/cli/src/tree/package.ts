@@ -1,12 +1,13 @@
-import {join} from 'path'
-import {readJSONSync} from 'fs-extra'
-import {existsSync} from 'fs'
+import { join } from 'path'
+import { readJSONSync, writeJson } from 'fs-extra'
+import { existsSync } from 'fs'
 import chalk from 'chalk'
-import {mergeJson} from 'merge-packages'
+import { mergeJson } from 'merge-packages'
+import { autoInjectable } from 'tsyringe'
 
 interface IDependency {
-    name?: string,
-    version?: string,
+    name?: string
+    version?: string
 }
 
 export type Dependency = IDependency
@@ -22,13 +23,7 @@ export interface PkgJson {
 }
 
 export class Package {
-    name = this.content.name
-    private dependencies = this.content.dependencies ?? {}
-    private devDependencies = this.content.devDependencies ?? {}
-    private peerDependencies = this.content.peerDependencies ?? {}
-
-    constructor(public content: PkgJson) {
-    }
+    constructor(private content: PkgJson, private readonly path?: string) {}
 
     static load = (dir: string): Package => {
         const pkgJsonPath = join(dir, 'package.json')
@@ -42,21 +37,48 @@ export class Package {
 
         delete content.private
 
-        return new Package(content)
+        return new Package(content, pkgJsonPath)
     }
 
     findDependency(search: string): Dependency {
-        const dependency = Object.entries({...this.dependencies, ...this.devDependencies, ...this.peerDependencies})
+        const dependency = Object.entries({
+            ...this.content.dependencies,
+            ...this.content.devDependencies,
+            ...this.content.peerDependencies,
+        })
             .filter(([key]) => key === search)
             .flat(1)
 
-        return dependency ? {
-            name: dependency[0],
-            version: dependency[1],
-        } : {}
+        return dependency
+            ? {
+                  name: dependency[0],
+                  version: dependency[1],
+              }
+            : {}
+    }
+
+    get json(): PkgJson {
+        return this.content
+    }
+
+    assign(content: PkgJson): Package {
+        Object.assign(this.content, content)
+        return this
+    }
+
+    async write(targetDir?: string): Promise<void> {
+        targetDir = targetDir ?? this.path
+
+        if (!targetDir) {
+            console.error('You must specify a destination directory to write to a package.json.')
+            process.exit(1)
+        }
+
+        await writeJson(join(targetDir, 'package.json'), this.content, { spaces: '  ' })
     }
 }
 
+@autoInjectable()
 export class Packages {
     private packages: Package[] = []
 
@@ -71,8 +93,8 @@ export class Packages {
     /**
      * Merge the collected packages intelligently (uses the highest compatible version of a dependency)
      */
-    get merged(): Package {
+    merge(): Package {
         // todo error handling
-        return new Package(mergeJson(...this.getAll().map(pkg => pkg.content)))
+        return new Package(mergeJson(...this.getAll().map(pkg => pkg.json)), '')
     }
 }
