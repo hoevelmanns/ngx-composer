@@ -10,10 +10,10 @@ export const command = 'serve'
 export const describe = 'Serve the angular application(s)'
 export const builder = {
     directory: {
-        alias: 'd',
-        description: 'Directory or glob (e.g. "custom/plugins/**") to define the apps to process.',
+        description: 'Directories or glob (e.g. "custom/plugins/**") to define the workspaces to process.',
         default: '**',
-        type: 'string',
+        alias: 'd',
+        type: 'array',
     },
     exclude: {
         description: 'Exclude specified path or glob.',

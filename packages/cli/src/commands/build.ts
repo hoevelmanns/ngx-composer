@@ -10,10 +10,10 @@ export const command = 'build'
 export const describe = 'Build the angular application(s)'
 export const builder = {
     directory: {
-        description: 'Directory or glob (e.g. "custom/plugins/**") to define the apps to process.',
+        description: 'Directories or glob (e.g. "custom/plugins/**") to define the workspaces to process.',
         default: '**',
         alias: 'd',
-        type: 'string',
+        type: 'array',
     },
     exclude: {
         description: 'Exclude specified path or glob.',

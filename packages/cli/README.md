@@ -15,22 +15,22 @@ Build the angular application(s)
 ngx build
 ```
 *Options*
-```
-      --version             Show version number                        [boolean]
-      --help                Show help                                  [boolean]
-  -d, --directory           Directory or glob (e.g. "custom/plugins/**") to
-                            define the apps to process.          [default: "**"]
-  -e, --exclude             Exclude specified path or glob. Can be used many
-                            times.
-  -s, --single-bundle       Only build the shell app.            [default: true]
-  -c, --concurrent          Run the tasks concurrently.          [default: true]
-      --vendor-chunk        Generate a separate bundle containing only vendor
-                            libraries.                          [default: false]
-      --named-chunks        Use file name for lazy loaded chunks.[default: true]
-      --create-loader-file  Creates a template containing only the angular dist
-                            scripts
+```shell
+      --version             Show version number                                  [boolean]
+      --help                Show help                                            [boolean]
+  -d, --directory           Directories or glob (e.g. "custom/plugins/**") to define the
+                            workspaces to process.                 [array] [default: "**"]
+  -e, --exclude             Exclude specified path or glob.                        [array]
+      --outputPath          The full path for the new output directory
+                                                                [string] [default: "dist"]
+      --vendor-chunk        Generate a separate bundle containing only vendor libraries.
+                                                                [boolean] [default: false]
+      --named-chunks        Use file name for lazy loaded chunks.
+                                                                [boolean] [default: false]
+      --create-loader-file  Creates a template containing only the angular dist scripts
+                                                                [boolean] [default: false]
       --loader-file-name    The name of the loader file
-                                                     [default: "app-loader.tpl"]
+                                                      [string] [default: "app-loader.tpl"]
 
 ```
 
@@ -43,14 +43,13 @@ ngx serve
 
 *Options*
 ```shell
-      --version             Show version number                        [boolean]
-      --help                Show help                                  [boolean]
-  -d, --directory           Directory or glob (e.g. "custom/plugins/**") to
-                            define the apps to process.          [default: "**"]
-  -e, --exclude             Exclude specified path or glob. Can be used many
-                            times.
-      --create-loader-file  Creates a template containing only the angular dist
-                            scripts
+      --version             Show version number                                  [boolean]
+      --help                Show help                                            [boolean]
+  -d, --directory           Directories or glob (e.g. "custom/plugins/**") to define the
+                            workspaces to process.                 [array] [default: "**"]
+  -e, --exclude             Exclude specified path or glob.                        [array]
+      --create-loader-file  Creates a template containing only the angular dist scripts
+                                                                                 [boolean]
       --loader-file-name    The name of the loader file
-                                                     [default: "app-loader.tpl"]
+                                                      [string] [default: "app-loader.tpl"]
 ```

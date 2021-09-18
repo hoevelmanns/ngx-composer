@@ -23,6 +23,6 @@ import('./commands').then(
             .commands({ command: '*', handler: () => yargs.showHelp() })
             .scriptName(cliBinName ?? 'NGX Composer')
             .usage(`$0 <cmd> [args]`)
-            .wrap(Math.min(100, yargs.terminalWidth()))
+            .wrap(Math.min(90, yargs.terminalWidth()))
             .help().argv
 )

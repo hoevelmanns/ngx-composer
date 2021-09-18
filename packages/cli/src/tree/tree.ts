@@ -16,23 +16,27 @@ import yargs from 'yargs'
 export class Tree {
     private workspaceDirs = <string[]>[]
     private args = <Argv>yargs(process.argv)
-    private options = this.args.options({ e: { alias: 'exclude', type: 'array' }, d: { alias: 'directory', default: '**' } }).argv
+    private options = this.args.options({
+        e: { alias: 'exclude', type: 'array' },
+        d: { alias: 'directory', type: 'array', default: '**' },
+    }).argv
 
     constructor(@inject(Workspaces) readonly workspaces: Workspaces, @inject(Packages) readonly packages: Packages) {
         this.init()
     }
 
-    init(directory?: string, exclude?: string | string[]) {
-        this.options.exclude = exclude ?? this.options.exclude
-        this.options.directory = directory ?? this.options.directory
+    init(directory?: string | string[], exclude?: string | string[]) {
+        this.options.exclude = exclude ?? [this.options.exclude].flat(1)
+        this.options.directory = directory ?? [this.options.directory].flat(1)
 
-        const ignore = ['**/{node_modules,vendor,.git}/**'].concat(
-            [this.options.exclude].flat(1).map(ex => (isGlob(ex) ? ex : `**/${ex}/**`))
+        const ignore = ['**/{node_modules,vendor,.git}/**'].concat(this.options.exclude.map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
+
+        this.options.directory.map(dir =>
+            fg
+                .sync(join(dir.replace('angular.json', ''), 'angular.json'), { ignore })
+                .map(ws => ws.replace('/angular.json', ''))
+                .forEach(dir => !this.workspaceDirs.includes(dir) && this.workspaceDirs.push(dir))
         )
-
-        this.workspaceDirs = fg
-            .sync(join(this.options.directory, 'angular.json'), { ignore })
-            .map(ws => ws.replace('angular.json', ''))
 
         this.workspaceDirs.forEach(dir => {
             this.workspaces.add(dir)
