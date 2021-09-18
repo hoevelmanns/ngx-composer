@@ -26,14 +26,14 @@ export class Tree {
     }
 
     init(directory?: string | string[], exclude?: string | string[]) {
-        this.options.exclude = exclude ?? [this.options.exclude].flat(1)
-        this.options.directory = directory ?? [this.options.directory].flat(1)
+        exclude = [exclude ?? this.options.exclude].flat(1)
+        directory = [directory ?? this.options.directory].flat(1)
 
-        const ignore = ['**/{node_modules,vendor,.git}/**'].concat(this.options.exclude.map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
+        const ignore = ['**/{node_modules,vendor,.git}/**'].concat(exclude.map(ex => (isGlob(ex) ? ex : `**/${ex}/**`)))
 
-        this.options.directory.map(dir =>
+        directory.map(dir =>
             fg
-                .sync(join(dir.replace('angular.json', ''), 'angular.json'), { ignore })
+                .sync(join(dir.replace('angular.json', ''), 'angular.json'), { ignore, suppressErrors: true })
                 .map(ws => ws.replace('/angular.json', ''))
                 .forEach(dir => !this.workspaceDirs.includes(dir) && this.workspaceDirs.push(dir))
         )

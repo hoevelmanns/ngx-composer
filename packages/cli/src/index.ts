@@ -24,5 +24,9 @@ import('./commands').then(
             .scriptName(cliBinName ?? 'NGX Composer')
             .usage(`$0 <cmd> [args]`)
             .wrap(Math.min(90, yargs.terminalWidth()))
+            .updateStrings({
+                'Commands:': chalk.cyan('Commands:'),
+                'Options:': chalk.cyan('Flags:'),
+            })
             .help().argv
 )
